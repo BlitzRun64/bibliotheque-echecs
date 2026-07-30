@@ -24,15 +24,47 @@ export default function Admin() {
     setDemandes(data || [])
   }
 
+async function uploaderImage(fichier) {
+  const nomFichier = `${Date.now()}-${fichier.name}`
+  const { error } = await supabase.storage
+    .from('couvertures')
+    .upload(nomFichier, fichier)
+
+  if (error) {
+    alert('Erreur upload image : ' + error.message)
+    return null
+  }
+
+  const { data } = supabase.storage
+    .from('couvertures')
+    .getPublicUrl(nomFichier)
+
+  return data.publicUrl
+}
+
 async function ajouterLivre(e) {
   e.preventDefault()
-  const { error } = await supabase.from('livres').insert(nouveauLivre)
+
+  let urlFinale = nouveauLivre.couverture_url
+
+  // Si un fichier a été sélectionné, on l'upload et on récupère son URL
+  if (fichierImage) {
+    const urlUploadee = await uploaderImage(fichierImage)
+    if (urlUploadee) urlFinale = urlUploadee
+  }
+
+  const { error } = await supabase.from('livres').insert({
+    ...nouveauLivre,
+    couverture_url: urlFinale,
+  })
+
   if (error) {
     alert('Erreur ajout livre : ' + error.message)
     console.error(error)
     return
   }
-  setNouveauLivre({ titre: '', auteur: '', theme: '' })
+  setNouveauLivre({ titre: '', auteur: '', theme: '', couverture_url: '' })
+  setFichierImage(null)
   chargerLivres()
 }
 
