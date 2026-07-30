@@ -41,21 +41,29 @@ async function ajouterLivre(e) {
     chargerLivres()
   }
 
-  async function traiterDemande(demande, accepter) {
-    await supabase
-      .from('demandes_emprunt')
-      .update({ statut: accepter ? 'acceptee' : 'refusee' })
-      .eq('id', demande.id)
+  async function marquerCommeRendu(id) {
+  await supabase
+    .from('livres')
+    .update({ disponible: true, emprunteur_nom: null })
+    .eq('id', id)
+  chargerLivres()
+}
 
-    if (accepter) {
-      await supabase
-        .from('livres')
-        .update({ disponible: false })
-        .eq('id', demande.livre_id)
-    }
-    chargerDemandes()
-    chargerLivres()
+  async function traiterDemande(demande, accepter) {
+  await supabase
+    .from('demandes_emprunt')
+    .update({ statut: accepter ? 'acceptee' : 'refusee' })
+    .eq('id', demande.id)
+
+  if (accepter) {
+    await supabase
+      .from('livres')
+      .update({ disponible: false, emprunteur_nom: demande.nom_demandeur })
+      .eq('id', demande.livre_id)
   }
+  chargerDemandes()
+  chargerLivres()
+}
 
   return (
     <div className="max-w-4xl mx-auto p-4">
@@ -112,13 +120,32 @@ async function ajouterLivre(e) {
         </form>
 
         {livres.map((l) => (
-          <div key={l.id} className="flex justify-between items-center border-b py-2">
-            <span>{l.titre} — {l.auteur} ({l.disponible ? 'dispo' : 'emprunté'})</span>
-            <button onClick={() => supprimerLivre(l.id)} className="text-red-600 text-sm">
-              Supprimer
-            </button>
-          </div>
-        ))}
+    <div key={l.id} className="flex justify-between items-center border-b py-2">
+      <span>
+        {l.titre} — {l.auteur}{' '}
+        {l.disponible ? (
+          <span className="text-green-600 text-sm">(disponible)</span>
+        ) : (
+          <span className="text-red-600 text-sm">
+            (emprunté{l.emprunteur_nom ? ` par ${l.emprunteur_nom}` : ''})
+          </span>
+        )}
+      </span>
+      <div className="flex gap-2">
+        {!l.disponible && (
+          <button
+            onClick={() => marquerCommeRendu(l.id)}
+            className="bg-green-600 text-white rounded px-3 py-1 text-sm"
+          >
+            Marquer comme rendu
+          </button>
+        )}
+        <button onClick={() => supprimerLivre(l.id)} className="text-red-600 text-sm">
+          Supprimer
+        </button>
+      </div>
+    </div>
+  ))}
       </section>
     </div>
   )
