@@ -5,7 +5,8 @@ export default function Admin() {
   const [livres, setLivres] = useState([])
   const [demandes, setDemandes] = useState([])
   const [nouveauLivre, setNouveauLivre] = useState({ titre: '', auteur: '', theme: '' })
-
+  const [fichierImage, setFichierImage] = useState(null)
+  
   useEffect(() => {
     chargerLivres()
     chargerDemandes()
@@ -129,7 +130,7 @@ async function ajouterLivre(e) {
 
       <section>
         <h2 className="font-semibold mb-3">Gestion des livres</h2>
-        <form onSubmit={ajouterLivre} className="flex gap-2 mb-4">
+        <form onSubmit={ajouterLivre} className="flex flex-wrap gap-2 mb-4 items-center">
           <input
             placeholder="Titre"
             value={nouveauLivre.titre}
@@ -148,8 +149,23 @@ async function ajouterLivre(e) {
             onChange={(e) => setNouveauLivre({ ...nouveauLivre, theme: e.target.value })}
             className="border rounded px-2 py-1"
           />
+          <input
+            placeholder="URL de l'image (optionnel)"
+            value={nouveauLivre.couverture_url}
+            onChange={(e) => setNouveauLivre({ ...nouveauLivre, couverture_url: e.target.value })}
+            className="border rounded px-2 py-1"
+          />
+          <label className="text-sm text-gray-600">
+            ou upload :
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setFichierImage(e.target.files[0])}
+              className="text-sm ml-1"
+            />
+          </label>
           <button className="bg-blue-600 text-white rounded px-3 py-1">Ajouter</button>
-        </form>
+      </form>
 
         {livres.map((l) => (
     <div key={l.id} className="flex justify-between items-center border-b py-2">

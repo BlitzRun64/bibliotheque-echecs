@@ -67,6 +67,17 @@ export default function Bibliotheque() {
           const dejaDemandeCetteSession = demandesEnAttente.includes(livre.id)
           return (
             <div key={livre.id} className="border rounded-lg p-4 shadow-sm">
+              {livre.couverture_url ? (
+                    <img
+                      src={livre.couverture_url}
+                      alt={livre.titre}
+                      className="w-full h-40 object-cover rounded mb-3"
+                    />
+                  ) : (
+                    <div className="w-full h-40 bg-gray-100 rounded mb-3 flex items-center justify-center text-gray-400 text-sm">
+                      Pas d'image
+                    </div>
+                  )}
               <h2 className="font-semibold">{livre.titre}</h2>
               <p className="text-sm text-gray-600">{livre.auteur}</p>
               <p className="text-xs text-gray-400 mb-2">{livre.theme}</p>
