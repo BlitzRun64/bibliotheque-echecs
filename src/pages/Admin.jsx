@@ -6,7 +6,10 @@ export default function Admin() {
   const [demandes, setDemandes] = useState([])
   const [nouveauLivre, setNouveauLivre] = useState({ titre: '', auteur: '', theme: '' })
   const [fichierImage, setFichierImage] = useState(null)
-  
+  const [livreEnEdition, setLivreEnEdition] = useState(null)
+  const [edition, setEdition] = useState({ titre: '', auteur: '', theme: '', couverture_url: '' })
+  const [fichierEdition, setFichierEdition] = useState(null)
+
   useEffect(() => {
     chargerLivres()
     chargerDemandes()
@@ -79,6 +82,35 @@ async function ajouterLivre(e) {
     .from('livres')
     .update({ disponible: true, emprunteur_nom: null })
     .eq('id', id)
+  chargerLivres()
+}
+
+function commencerEdition(livre) {
+  setLivreEnEdition(livre.id)
+  setEdition({
+    titre: livre.titre,
+    auteur: livre.auteur,
+    theme: livre.theme || '',
+    couverture_url: livre.couverture_url || '',
+  })
+  setFichierEdition(null)
+}
+
+async function sauvegarderEdition(id) {
+  let urlFinale = edition.couverture_url
+  if (fichierEdition) {
+    const urlUploadee = await uploaderImage(fichierEdition)
+    if (urlUploadee) urlFinale = urlUploadee
+  }
+  const { error } = await supabase
+    .from('livres')
+    .update({ ...edition, couverture_url: urlFinale })
+    .eq('id', id)
+  if (error) {
+    alert('Erreur modification : ' + error.message)
+    return
+  }
+  setLivreEnEdition(null)
   chargerLivres()
 }
 
@@ -168,32 +200,39 @@ async function ajouterLivre(e) {
       </form>
 
         {livres.map((l) => (
-    <div key={l.id} className="flex justify-between items-center border-b py-2">
-      <span>
-        {l.titre} — {l.auteur}{' '}
-        {l.disponible ? (
-          <span className="text-green-600 text-sm">(disponible)</span>
-        ) : (
-          <span className="text-red-600 text-sm">
-            (emprunté{l.emprunteur_nom ? ` par ${l.emprunteur_nom}` : ''})
-          </span>
-        )}
-      </span>
-      <div className="flex gap-2">
-        {!l.disponible && (
-          <button
-            onClick={() => marquerCommeRendu(l.id)}
-            className="bg-green-600 text-white rounded px-3 py-1 text-sm"
-          >
-            Marquer comme rendu
-          </button>
-        )}
-        <button onClick={() => supprimerLivre(l.id)} className="text-red-600 text-sm">
-          Supprimer
-        </button>
+  <div key={l.id} className="border-b py-2">
+    {livreEnEdition === l.id ? (
+      <div className="flex flex-wrap gap-2 items-center bg-gray-50 p-2 rounded">
+        <input value={edition.titre} onChange={(e) => setEdition({ ...edition, titre: e.target.value })} placeholder="Titre" className="border rounded px-2 py-1 text-sm" />
+        <input value={edition.auteur} onChange={(e) => setEdition({ ...edition, auteur: e.target.value })} placeholder="Auteur" className="border rounded px-2 py-1 text-sm" />
+        <input value={edition.theme} onChange={(e) => setEdition({ ...edition, theme: e.target.value })} placeholder="Thème" className="border rounded px-2 py-1 text-sm" />
+        <input type="file" accept="image/*" onChange={(e) => setFichierEdition(e.target.files[0])} className="text-xs" />
+        <button onClick={() => sauvegarderEdition(l.id)} className="bg-blue-600 text-white rounded px-3 py-1 text-sm">Enregistrer</button>
+        <button onClick={() => setLivreEnEdition(null)} className="text-gray-500 text-sm">Annuler</button>
       </div>
-    </div>
-  ))}
+    ) : (
+      <div className="flex justify-between items-center">
+        <span>
+          {l.titre} — {l.auteur}{' '}
+          {l.disponible ? (
+            <span className="text-green-600 text-sm">(disponible)</span>
+          ) : (
+            <span className="text-red-600 text-sm">
+              (emprunté{l.emprunteur_nom ? ` par ${l.emprunteur_nom}` : ''})
+            </span>
+          )}
+        </span>
+        <div className="flex gap-3 text-lg">
+          {!l.disponible && (
+            <button onClick={() => marquerCommeRendu(l.id)} title="Marquer comme rendu">📗</button>
+          )}
+          <button onClick={() => commencerEdition(l)} title="Modifier">🔄️</button>
+          <button onClick={() => supprimerLivre(l.id)} title="Supprimer">🗑️</button>
+        </div>
+      </div>
+    )}
+  </div>
+))}
       </section>
     </div>
   )
