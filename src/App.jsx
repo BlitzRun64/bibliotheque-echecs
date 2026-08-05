@@ -5,6 +5,10 @@ import Navbar from './components/Navbar'
 import Bibliotheque from './pages/Bibliotheque'
 import Login from './pages/Login'
 import Admin from './pages/Admin'
+import Inscription from './pages/Inscription'
+import Profil from './pages/Profil'
+
+
 
 function RouteProtegee({ children }) {
   const [session, setSession] = useState(undefined)
@@ -22,6 +26,9 @@ export default function App() {
     <BrowserRouter>
       <Navbar />
       <Routes>
+      
+        <Route path="/inscription" element={<Inscription />} />
+        <Route path="/profil" element={<Profil />} /> 
         <Route path="/" element={<Bibliotheque />} />
         <Route path="/login" element={<Login />} />
         <Route path="/admin" element={<RouteProtegee><Admin /></RouteProtegee>} />
