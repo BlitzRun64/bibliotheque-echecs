@@ -9,21 +9,40 @@ export default function Bibliotheque() {
   const [nom, setNom] = useState('')
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState('')
+  const [utilisateur, setUtilisateur] = useState(null) // null = pas connecté
+  const [profil, setProfil] = useState(null)
 
-  useEffect(() => { chargerLivres() }, [])
+  useEffect(() => {
+    chargerLivres()
+    chargerUtilisateur()
+  }, [])
 
   async function chargerLivres() {
     const { data, error } = await supabase.from('livres').select('*').order('titre')
     if (!error) setLivres(data)
   }
 
+  async function chargerUtilisateur() {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    setUtilisateur(user)
+    const { data } = await supabase.from('profils').select('*').eq('id', user.id).single()
+    setProfil(data)
+  }
+
   async function envoyerDemande(livreId) {
-    if (!nom.trim()) { setMessage("Merci d'indiquer ton nom"); return }
+    const nomFinal = utilisateur ? profil?.nom : nom.trim()
+    const emailFinal = utilisateur ? utilisateur.email : email.trim()
+
+    if (!nomFinal) { setMessage("Merci d'indiquer ton nom"); return }
+
     const { error } = await supabase.from('demandes_emprunt').insert({
       livre_id: livreId,
-      nom_demandeur: nom.trim(),
-      email_demandeur: email.trim(),
+      nom_demandeur: nomFinal,
+      email_demandeur: emailFinal,
+      utilisateur_id: utilisateur ? utilisateur.id : null,
     })
+
     if (error) {
       setMessage('Erreur : ' + error.message)
     } else {
@@ -68,11 +87,7 @@ export default function Bibliotheque() {
           return (
             <div key={livre.id} className="border rounded-lg p-4 shadow-sm flex gap-4">
               {livre.couverture_url ? (
-                <img
-                  src={livre.couverture_url}
-                  alt={livre.titre}
-                  className="w-20 h-28 object-cover rounded flex-shrink-0"
-                />
+                <img src={livre.couverture_url} alt={livre.titre} className="w-20 h-28 object-cover rounded flex-shrink-0" />
               ) : (
                 <div className="w-20 h-28 bg-gray-100 rounded flex-shrink-0 flex items-center justify-center text-gray-400 text-xs text-center">
                   Pas d'image
@@ -91,8 +106,16 @@ export default function Bibliotheque() {
                   <div className="mt-3">
                     {demandeEnCours === livre.id ? (
                       <div className="flex flex-col gap-2">
-                        <input placeholder="Ton nom" value={nom} onChange={(e) => setNom(e.target.value)} className="border rounded px-2 py-1 text-sm" />
-                        <input placeholder="Email (optionnel)" value={email} onChange={(e) => setEmail(e.target.value)} className="border rounded px-2 py-1 text-sm" />
+                        {utilisateur ? (
+                          <p className="text-sm text-gray-600">
+                            Demande au nom de <strong>{profil?.nom}</strong> ({utilisateur.email})
+                          </p>
+                        ) : (
+                          <>
+                            <input placeholder="Ton nom" value={nom} onChange={(e) => setNom(e.target.value)} className="border rounded px-2 py-1 text-sm" />
+                            <input placeholder="Email (optionnel)" value={email} onChange={(e) => setEmail(e.target.value)} className="border rounded px-2 py-1 text-sm" />
+                          </>
+                        )}
                         <button onClick={() => envoyerDemande(livre.id)} className="bg-blue-600 text-white rounded px-2 py-1 text-sm">
                           Confirmer la demande
                         </button>

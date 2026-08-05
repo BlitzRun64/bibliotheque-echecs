@@ -16,7 +16,7 @@ export default function Profil() {
     const { data: d } = await supabase
       .from('demandes_emprunt')
       .select('*, livres(titre)')
-      .eq('email_demandeur', user.email)
+      .eq('email_demandeur', user.id)
       .eq('statut', 'en_attente')
     setDemandes(d || [])
 
