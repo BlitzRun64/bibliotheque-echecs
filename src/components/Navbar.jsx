@@ -11,6 +11,7 @@ export default function Navbar() {
   const [session, setSession] = useState(undefined)
   const [profil, setProfil] = useState(null)
   const navigate = useNavigate()
+  const [notifications, setNotifications] = useState([])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session))
@@ -21,11 +22,17 @@ export default function Navbar() {
   useEffect(() => {
   if (session) {
     chargerProfil()
-    chargerDemandes()
   } else {
     setProfil(null)
   }
 }, [session])
+
+useEffect(() => {
+  if (profil) {
+    if (profil.est_admin) chargerDemandes()
+    chargerNotifications()
+  }
+}, [profil])
 
   async function chargerProfil() {
   const { data: { user } } = await supabase.auth.getUser()
@@ -48,6 +55,25 @@ export default function Navbar() {
     navigate('/')
   }
 
+  async function chargerNotifications() {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+
+  const requete = profil?.est_admin
+    ? supabase.from('notifications').select('*').eq('destinataire_admin', true).eq('lue', false)
+    : supabase.from('notifications').select('*').eq('destinataire_id', user.id).eq('lue', false)
+
+  const { data } = await requete.order('created_at', { ascending: false })
+  setNotifications(data || [])
+}
+
+async function marquerNotifsLues() {
+  const idsAMarquer = notifications.map((n) => n.id)
+  if (idsAMarquer.length === 0) return
+  await supabase.from('notifications').update({ lue: true }).in('id', idsAMarquer)
+}
+
+
   const onglets = [{ label: 'Bibliothèque', to: '/' }]
 
   return (
@@ -66,30 +92,38 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-4">
-          {session && profil?.est_admin && (
+          {session && (
             <div className="relative">
-              <button onClick={() => setMenuDemandesOuvert(!menuDemandesOuvert)} className="relative text-xl leading-none">
+              <button
+                onClick={() => { setMenuDemandesOuvert(!menuDemandesOuvert); if (!menuDemandesOuvert) marquerNotifsLues() }}
+                className="relative text-xl leading-none"
+              >
                 📬
-                {demandes.length > 0 && (
+                {(demandes.length + notifications.length) > 0 && (
                   <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {demandes.length}
+                    {demandes.length + notifications.length}
                   </span>
                 )}
               </button>
+
               {menuDemandesOuvert && (
-                <div className="absolute right-0 mt-2 w-72 bg-white border rounded shadow-lg max-h-72 overflow-y-auto z-50">
-                  {demandes.length === 0 ? (
-                    <p className="text-sm text-gray-500 p-3">Aucune demande</p>
-                  ) : (
-                    demandes.map((d) => (
-                      <div key={d.id} className="p-3 border-b text-sm">
-                        <strong>{d.nom_demandeur}</strong> veut emprunter <em>{d.livres?.titre}</em>
-                      </div>
-                    ))
+                <div className="fixed sm:absolute left-1/2 sm:left-auto right-auto sm:right-0 -translate-x-1/2 sm:translate-x-0 top-16 sm:top-auto sm:mt-2 w-[90vw] sm:w-72 bg-white border rounded shadow-lg max-h-72 overflow-y-auto z-50">
+                  {profil?.est_admin && demandes.map((d) => (
+                    <div key={d.id} className="p-3 border-b text-sm">
+                      <strong>{d.nom_demandeur}</strong> veut emprunter <em>{d.livres?.titre}</em>
+                    </div>
+                  ))}
+                  {notifications.map((n) => (
+                    <div key={n.id} className="p-3 border-b text-sm">{n.message}</div>
+                  ))}
+                  {demandes.length === 0 && notifications.length === 0 && (
+                    <p className="text-sm text-gray-500 p-3">Rien de nouveau</p>
                   )}
-                  <Link to="/admin" onClick={() => setMenuDemandesOuvert(false)} className="block text-center text-blue-600 text-sm p-2 hover:bg-gray-50">
-                    Gérer les demandes →
-                  </Link>
+                  {profil?.est_admin && (
+                    <Link to="/admin" onClick={() => setMenuDemandesOuvert(false)} className="block text-center text-blue-600 text-sm p-2 hover:bg-gray-50">
+                      Gérer les demandes →
+                    </Link>
+                  )}
                 </div>
               )}
             </div>
