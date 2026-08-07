@@ -16,6 +16,7 @@ export default function Admin() {
   const [delaiAttribution, setDelaiAttribution] = useState('')
   const [livreHistorique, setLivreHistorique] = useState(null)
   const [evenements, setEvenements] = useState([])
+  const [messageAdmin, setMessageAdmin] = useState('')
 
   useEffect(() => {
     chargerLivres()
@@ -42,9 +43,9 @@ async function uploaderImage(fichier) {
     .upload(nomFichier, fichier)
 
   if (error) {
-    alert('Erreur upload image : ' + error.message)
+    setMessageAdmin('Erreur upload image : ' + error.message)
     return null
-  }
+  } 
 
   const { data } = supabase.storage
     .from('couvertures')
@@ -76,6 +77,7 @@ async function ajouterLivre(e) {
     console.error(error)
     return
   }
+  setMessageAdmin('Livre ajouté avec succès !')
 
   await enregistrerEvenement(data.id, 'ajout', `Livre ajouté : ${data.titre}`)
   setNouveauLivre({ titre: '', auteur: '', theme: '', couverture_url: '' })
@@ -175,9 +177,10 @@ async function sauvegarderEdition(id) {
     .update({ ...edition, couverture_url: urlFinale })
     .eq('id', id)
   if (error) {
-    alert('Erreur modification : ' + error.message)
+    setMessageAdmin('Erreur modification : ' + error.message)
     return
   }
+  setMessageAdmin('Livre modifié avec succès !')
   setLivreEnEdition(null)
   await enregistrerEvenement(id, 'modification', `Fiche modifiée : ${edition.titre}`)
   chargerLivres()
@@ -233,7 +236,11 @@ async function enregistrerEvenement(livreId, type, description) {
 return (
     <div className="max-w-4xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-6">Administration</h1>
-
+      {messageAdmin && (
+        <p className="mb-4 text-sm bg-blue-50 text-blue-700 border border-blue-200 rounded p-2">
+           {messageAdmin}
+        </p>
+        )}
       <section className="mb-8">
         <h2 className="font-semibold mb-3">Demandes en attente</h2>
         {demandes.length === 0 && <p className="text-sm text-gray-500">Aucune demande</p>}
