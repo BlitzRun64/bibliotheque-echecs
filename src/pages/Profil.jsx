@@ -36,6 +36,15 @@ export default function Profil() {
     setRendus(r || [])
   }
 
+  function tempsRestant(dateLimite) {
+    if (!dateLimite) return null
+    const diffMs = new Date(dateLimite) - new Date()
+    const diffJours = Math.ceil(diffMs / (1000 * 60 * 60 * 24))
+    if (diffJours < 0) return { texte: `en retard de ${Math.abs(diffJours)} jour(s)`, retard: true }
+    if (diffJours === 0) return { texte: "à rendre aujourd'hui", retard: false }
+    return { texte: `encore ${diffJours} jour(s)`, retard: false }
+}
+
   return (
     <div className="max-w-3xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-6">Mon profil</h1>
@@ -68,6 +77,25 @@ export default function Profil() {
           </div>
         ))}
       </section>
+
+      <section className="mb-8">
+  <h2 className="font-semibold mb-2">Empruntés actuellement</h2>
+  {enCours.length === 0 && <p className="text-sm text-gray-500">Aucun emprunt en cours</p>}
+  {enCours.map((p) => {
+    const restant = tempsRestant(p.date_limite)
+    return (
+      <div key={p.id} className="border-b py-2 text-sm">
+        <strong>{p.livres?.titre}</strong> — depuis le {new Date(p.date_debut).toLocaleDateString('fr-FR')}
+        {restant && (
+          <span className={restant.retard ? 'text-red-600 font-semibold ml-2' : 'text-green-500 ml-2'}>
+            ({restant.texte})
+          </span>
+        )}
+      </div>
+    )
+  })}
+</section>
+
     </div>
   )
 }
