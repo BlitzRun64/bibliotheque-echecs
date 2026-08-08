@@ -30,6 +30,7 @@ export default function Login() {
       {erreur && <p className="text-red-600 text-sm">{erreur}</p>}
       <button className="bg-blue-600 text-white rounded px-3 py-2">Se connecter</button>
       <Link to="/inscription" className="text-sm text-blue-600 underline text-center">Créer un compte</Link>
+      <Link to="/mot-de-passe-oublie" className="text-sm text-blue-600 underline text-center">Mot de passe oublié ?</Link>    
     </form>
   )
 }

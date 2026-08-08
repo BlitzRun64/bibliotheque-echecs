@@ -8,6 +8,8 @@ import Admin from './pages/Admin'
 import Inscription from './pages/Inscription'
 import Profil from './pages/Profil'
 import UpdatePrompt from './components/UpdatePrompt'
+import MotDePasseOublie from './pages/MotDePasseOublie'
+import ReinitialiserMdp from './pages/ReinitialiserMdp'
 
 
 function RouteProtegee({ children }) {
@@ -33,6 +35,8 @@ export default function App() {
         <Route path="/profil" element={<Profil />} /> 
         <Route path="/" element={<Bibliotheque />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/mot-de-passe-oublie" element={<MotDePasseOublie />} />
+        <Route path="/reinitialiser-mdp" element={<ReinitialiserMdp />} />
         <Route path="/admin" element={<RouteProtegee><Admin /></RouteProtegee>} />
       </Routes>
     </BrowserRouter>
