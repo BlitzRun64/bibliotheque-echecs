@@ -13,10 +13,10 @@ export default defineConfig({
         cleanupOutdatedCaches: true,},
       manifest: {
         name: 'Bibliothèque du club',
-        short_name: 'BiblioÉchecs',
+        short_name: 'BiblioChess',
         description: "Bibliothèque du club d'échecs",
         theme_color: '#2563eb',
-        background_color: '#ffffff',
+        background_color: '#073b14',
         display: 'standalone',
         start_url: '/',
         icons: [
