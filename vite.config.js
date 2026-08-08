@@ -9,6 +9,8 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      workbox: {
+        cleanupOutdatedCaches: true,},
       manifest: {
         name: 'Bibliothèque du club',
         short_name: 'BiblioÉchecs',

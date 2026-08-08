@@ -139,6 +139,18 @@ async function marquerNotifsLues() {
                   <Link to={profil?.est_admin ? '/admin' : '/profil'} onClick={() => setMenuProfilOuvert(false)} className="block px-4 py-2 text-sm hover:bg-gray-50">
                     {profil?.est_admin ? 'Admin' : 'Mon profil'}
                   </Link>
+                  <button
+                    onClick={async () => {
+                      const regs = await navigator.serviceWorker.getRegistrations()
+                      regs.forEach((reg) => reg.update())
+                      setMenuProfilOuvert(false)
+                      alert('Vérification effectuée — actualise la page si une mise à jour est trouvée.')
+                    }}
+                    className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
+                  >
+                    Vérifier les mises à jour
+                  </button>
+
                   <button onClick={deconnexion} className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50">
                     Déconnexion
                   </button>

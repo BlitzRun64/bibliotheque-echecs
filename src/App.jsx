@@ -7,7 +7,7 @@ import Login from './pages/Login'
 import Admin from './pages/Admin'
 import Inscription from './pages/Inscription'
 import Profil from './pages/Profil'
-
+import UpdatePrompt from './components/UpdatePrompt'
 
 
 function RouteProtegee({ children }) {
@@ -20,6 +20,8 @@ function RouteProtegee({ children }) {
   if (session === undefined) return <p>Chargement...</p>
   return session ? children : <Navigate to="/login" />
 }
+
+
 
 export default function App() {
   return (
