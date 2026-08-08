@@ -18,7 +18,7 @@ export default function Admin() {
   const [evenements, setEvenements] = useState([])
   const [messageAdmin, setMessageAdmin] = useState('')
   const [previewImage, setPreviewImage] = useState(null)
-
+  const [previewEdition, setPreviewEdition] = useState(null)
 
   useEffect(() => {
     chargerLivres()
@@ -123,13 +123,9 @@ async function definirDelai(livreId, dateStr) {
 
 function commencerEdition(livre) {
   setLivreEnEdition(livre.id)
-  setEdition({
-    titre: livre.titre,
-    auteur: livre.auteur,
-    theme: livre.theme || '',
-    couverture_url: livre.couverture_url || '',
-  })
+  setEdition({ titre: livre.titre, auteur: livre.auteur, theme: livre.theme || '', couverture_url: livre.couverture_url || '' })
   setFichierEdition(null)
+  setPreviewEdition(null)
 }
 async function chercherUtilisateurs(texte) {
   setRechercheUtilisateur(texte)
@@ -319,14 +315,7 @@ return (
           )}
         </form>
 
-        {(previewImage || nouveauLivre.couverture_url) && (
-          <img
-            src={previewImage || nouveauLivre.couverture_url}
-            alt="Aperçu"
-            className="w-20 h-28 object-cover rounded border mb-4"
-          />
-        )}
-
+        
         {livres.map((l) => {
           const enRetard = !l.disponible && l.date_limite && new Date(l.date_limite) < new Date()
           return (
@@ -336,7 +325,17 @@ return (
                   <input value={edition.titre} onChange={(e) => setEdition({ ...edition, titre: e.target.value })} placeholder="Titre" className="border rounded px-2 py-1 text-sm" />
                   <input value={edition.auteur} onChange={(e) => setEdition({ ...edition, auteur: e.target.value })} placeholder="Auteur" className="border rounded px-2 py-1 text-sm" />
                   <input value={edition.theme} onChange={(e) => setEdition({ ...edition, theme: e.target.value })} placeholder="Thème" className="border rounded px-2 py-1 text-sm" />
-                  <input type="file" accept="image/*" onChange={(e) => setFichierEdition(e.target.files[0])} className="text-xs" />
+                  <input type="file" accept="image/*" onChange={(e) => { const fichier = e.target.files[0]
+                  setFichierEdition(fichier)
+                  setPreviewEdition(fichier ? URL.createObjectURL(fichier) : null)}} className="text-xs" />
+
+                  {(previewEdition || edition.couverture_url) && (
+                      <img
+                        src={previewEdition || edition.couverture_url}
+                        alt="Aperçu"
+                        className="w-16 h-20 object-cover rounded border"
+                      />
+                    )}
                   <button onClick={() => sauvegarderEdition(l.id)} className="bg-blue-600 text-white rounded px-3 py-1 text-sm">Enregistrer</button>
                   <button onClick={() => setLivreEnEdition(null)} className="text-gray-500 text-sm">Annuler</button>
                 </div>
