@@ -17,6 +17,8 @@ export default function Admin() {
   const [livreHistorique, setLivreHistorique] = useState(null)
   const [evenements, setEvenements] = useState([])
   const [messageAdmin, setMessageAdmin] = useState('')
+  const [previewImage, setPreviewImage] = useState(null)
+
 
   useEffect(() => {
     chargerLivres()
@@ -270,7 +272,7 @@ return (
 
       <section>
         <h2 className="font-semibold mb-3">Gestion des livres</h2>
-        <form onSubmit={ajouterLivre} className="flex flex-wrap gap-2 mb-4 items-center">
+        <form onSubmit={ajouterLivre} className="flex flex-wrap gap-2 mb-4 items-center">          
           <input
             placeholder="Titre"
             value={nouveauLivre.titre}
@@ -300,12 +302,30 @@ return (
             <input
               type="file"
               accept="image/*"
-              onChange={(e) => setFichierImage(e.target.files[0])}
+              onChange={(e) => { const fichier = e.target.files[0]
+              setFichierImage(fichier)
+              setPreviewImage(fichier ? URL.createObjectURL(fichier) : null)}}
               className="text-sm ml-1"
             />
           </label>
           <button className="bg-blue-600 text-white rounded px-3 py-1">Ajouter</button>
+
+          {(previewImage || nouveauLivre.couverture_url) && (
+            <img
+              src={previewImage || nouveauLivre.couverture_url}
+              alt="Aperçu"
+              className="w-20 h-28 object-cover rounded border mb-4"
+            />
+          )}
         </form>
+
+        {(previewImage || nouveauLivre.couverture_url) && (
+          <img
+            src={previewImage || nouveauLivre.couverture_url}
+            alt="Aperçu"
+            className="w-20 h-28 object-cover rounded border mb-4"
+          />
+        )}
 
         {livres.map((l) => {
           const enRetard = !l.disponible && l.date_limite && new Date(l.date_limite) < new Date()
@@ -355,9 +375,12 @@ return (
                 </div>
               ) : (
                 <>
-                  <div className="flex justify-between items-center flex-wrap gap-2">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                    {/* Ligne 1 : infos du livre */}
+                    <span className="font-medium">{l.titre} — {l.auteur}</span>
+
+                    {/* Ligne 2 : emprunt et état */}
                     <span>
-                      {l.titre} — {l.auteur}{' '}
                       {l.disponible ? (
                         <span className="text-green-600 text-sm">(disponible)</span>
                       ) : enRetard ? (
@@ -372,9 +395,9 @@ return (
                       )}
                     </span>
 
+                    {/* Ligne 3 : boutons */}
                     <div className="flex gap-3 items-center text-lg">
                       <button onClick={() => voirHistorique(l.id)} title="Historique">🕓</button>
-
                       {l.disponible && (
                         <button onClick={() => setLivreAttribution(l.id)} title="Attribuer directement">🎁</button>
                       )}

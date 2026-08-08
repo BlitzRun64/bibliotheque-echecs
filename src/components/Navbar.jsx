@@ -1,7 +1,8 @@
 // src/components/Navbar.jsx
 import { Link, useNavigate } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+
 import { supabase } from '../supabaseClient'
+import { useEffect, useState, useRef } from 'react'
 
 export default function Navbar() {
   const [demandes, setDemandes] = useState([])
@@ -12,6 +13,8 @@ export default function Navbar() {
   const [profil, setProfil] = useState(null)
   const navigate = useNavigate()
   const [notifications, setNotifications] = useState([])
+  const refDemandes = useRef(null)
+  const refProfil = useRef(null)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session))
@@ -33,6 +36,19 @@ useEffect(() => {
     chargerNotifications()
   }
 }, [profil])
+
+useEffect(() => {
+  function gererClicExterieur(e) {
+    if (refDemandes.current && !refDemandes.current.contains(e.target)) {
+      setMenuDemandesOuvert(false)
+    }
+    if (refProfil.current && !refProfil.current.contains(e.target)) {
+      setMenuProfilOuvert(false)
+    }
+  }
+  document.addEventListener('mousedown', gererClicExterieur)
+  return () => document.removeEventListener('mousedown', gererClicExterieur)
+}, [])
 
   async function chargerProfil() {
   const { data: { user } } = await supabase.auth.getUser()
@@ -93,7 +109,7 @@ async function marquerNotifsLues() {
 
         <div className="flex items-center gap-4">
           {session && (
-            <div className="relative">
+            <div className="relative"  ref={refDemandes}>
               <button
                 onClick={() => { setMenuDemandesOuvert(!menuDemandesOuvert); if (!menuDemandesOuvert) marquerNotifsLues() }}
                 className="relative text-xl leading-none"
@@ -130,7 +146,7 @@ async function marquerNotifsLues() {
           )}
 
           {session ? (
-            <div className="relative">
+            <div className="relative" ref={refProfil}>
               <button onClick={() => setMenuProfilOuvert(!menuProfilOuvert)} className="text-sm text-gray-700 flex items-center gap-1">
                 {profil?.nom || '...'} ▾
               </button>
