@@ -374,7 +374,7 @@ return (
                 </div>
               ) : (
                 <>
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                  <div className="flex flex-col sm:grid sm:grid-cols-[2fr_2fr_auto] sm:items-center gap-2">
                     {/* Ligne 1 : infos du livre */}
                     <span className="font-medium">{l.titre} — {l.auteur}</span>
 
@@ -383,13 +383,29 @@ return (
                       {l.disponible ? (
                         <span className="text-green-600 text-sm">(disponible)</span>
                       ) : enRetard ? (
-                        <span className="text-red-600 font-bold text-sm">
-                          (emprunté par {l.emprunteur_nom}, EN RETARD !!!)
+                        <span>
+                          <span className="text-purple-600 font-bold text-sm">
+                            (emprunté par {l.emprunteur_nom} <br/>
+                          </span>
+                            <span className="text-red-600 font-bold text-sm">
+                              <br/>
+                            — EN RETARD !!!)
+                          </span>
                         </span>
                       ) : (
-                        <span className="text-red-600 text-sm">
-                          (emprunté{l.emprunteur_nom ? ` par ${l.emprunteur_nom}` : ''}
-                          {l.date_limite ? ` — à rendre avant le ${new Date(l.date_limite).toLocaleDateString('fr-FR')}` : ''})
+                        <span>
+                          <span className="text-purple-600 font-bold text-sm">
+                            (emprunté{l.emprunteur_nom ? ` par ${l.emprunteur_nom}` : ''}  
+                          </span>
+
+
+
+                          <span className="text-red-600 text-sm">
+                          <br/>
+                            {l.date_limite ? ` —  à rendre avant le ${new Date(l.date_limite).toLocaleDateString('fr-FR')}` : ''})
+                          </span>
+
+                        
                         </span>
                       )}
                     </span>
