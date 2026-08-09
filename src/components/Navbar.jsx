@@ -179,7 +179,8 @@ async function marquerNotifsLues() {
               )}
             </div>
           ) : (
-            <Link to="/login" className="text-sm text-blue-600">Connexion</Link>
+            <Link to="/login" className="connexion">Connexion</Link>
+            
           )}
         </div>
       </nav>
