@@ -72,6 +72,7 @@ export default function Profil() {
 
   return (
     <div className="max-w-3xl mx-auto p-4">
+      
       <h1 className="text-2xl font-bold mb-6">Mon profil</h1>
 
       <div className="border rounded-lg overflow-hidden mb-10">

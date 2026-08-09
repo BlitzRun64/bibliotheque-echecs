@@ -100,10 +100,35 @@ color: #ffffff;}
   border: 2px solid var(--color-nav-text);
 }
 
+.motif-damier2 {
+  background:
+    linear-gradient(
+      90deg,
+      transparent 23px,
+      black 23px 25px,
+      transparent 25px
+    ),
+    linear-gradient(
+      0deg,
+      transparent 23px,
+      black 23px 25px,
+      transparent 25px
+    ),
+    conic-gradient(
+      black 25%,
+      transparent 0 50%,
+      black 0 75%,
+      transparent 0
+    );
+
+  background-size: 48px 48px;
+  border: 2px solid rgb(3, 3, 3);
+}
+
 
 /* Tokens dédiés à la page Admin — héritent du thème global par défaut */
 :root {
-  --admin-bg: white;
+  --admin-bg: rgb(232, 241, 245);
   --admin-surface: var(--color-surface);
   --admin-surface-alt: #f9fafb;
   --admin-text: var(--color-text);

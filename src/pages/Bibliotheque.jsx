@@ -70,7 +70,7 @@ export default function Bibliotheque() {
       <div className="bibliochess">
         <div className="relative overflow-hidden rounded-lg mb-6">
         <div className="absolute inset-0 motif-damier"></div>
-        <h1 className="relative text-center text-3xl font-bold text-heading  p-4"><mark className  = "StitreB">Bibliothèque du club</mark></h1>
+        <h1 className="z-10 relative text-center text-3xl font-bold text-heading  p-4"><mark className  = "StitreB">Bibliothèque du club</mark></h1>
         </div>
 
         <input

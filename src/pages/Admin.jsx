@@ -174,8 +174,15 @@ export default function Admin() {
   }
 
   return (
-    <div className="admin-page max-w-4xl mx-auto p-4">
-      <h1 className="admin-titre">Administration</h1>
+    <div className="bg-black min-h-screen">
+      <div className="admin-page max-w-4xl mx-auto p-4">
+        <div className="relative overflow-hidden rounded-lg mb-6">
+          <div className="absolute inset-0 motif-damier2"></div>
+          <h1 className="relative z-10 text-center text-3xl font-bold text-heading p-4">
+            <mark className="StitreB">Administration</mark>
+          </h1>
+        </div>
+      
 
       {messageAdmin && <p className="admin-message">{messageAdmin}</p>}
 
@@ -294,7 +301,7 @@ export default function Admin() {
 
                     <span>
                       {l.disponible ? (
-                        <span className="text-admin-primary text-sm">(disponible)</span>
+                        <span className="text-admin-primary text-green-600 text-sm">(disponible)</span>
                       ) : enRetard ? (
                         <span className="white-space: pre-line">
                           <span className="text-admin-accent font-bold text-sm">
@@ -363,5 +370,7 @@ export default function Admin() {
         })}
       </section>
     </div>
+    </div>
+    
   )
 }
