@@ -1,5 +1,146 @@
 @import "tailwindcss";
 
+@theme {
+  --color-primary: #073b14;
+  --color-primary-light: #0f5c22;
+  --color-secondary: #8B5E3C;
+  --color-secondary-light: #C9A98A;
+  --color-accent: #C9A227;
+  --color-bg: #F7F5F0;
+  --color-surface: #FFFFFF;
+  --color-text: #1F2421;
+  --color-text-muted: #5C5850;
+  --color-nav-bg: #FFFFFF;
+  --color-nav-text: #374151;
+  --color-heading: #073b14;
+
+  --font-display: "Fraunces", serif;
+}
+
+[data-theme="ocean"] {
+  --color-primary: #0c4a6e;
+  --color-primary-light: #0369a1;
+  --color-secondary: #64748b;
+  --color-secondary-light: #cbd5e1;
+  --color-accent: #f59e0b;
+  --color-bg: #f0f9ff;
+  --color-surface: #ffffff;
+  --color-text: #0f172a;
+  --color-text-muted: #64748b;
+  --color-nav-bg: #ffffff;
+  --color-nav-text: #374151;
+  --color-heading: #0c4a6e;
+}
+
+[data-theme="club1"] {
+   --color-primary: #023816;
+  --color-primary-light: #5322c5;
+  --color-secondary: #806b6b;
+  --color-secondary-light: #3f3f3f;
+  --color-accent: #d424a5;
+  --color-bg: #0d0d0d;
+  --color-surface: #f7eef8;
+  --color-text: #030202;
+  --color-text-muted: #2a2525;
+  --color-nav-bg: #073b14;
+  --color-nav-text: #ffffff;
+  --color-heading: #ffffff;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+.motif-damier {
+  background-image:
+    linear-gradient(45deg, var(--color-primary) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--color-primary) 25%, transparent 25%);
+  background-size: 24px 24px;
+  opacity: 0.06;
+}
+@theme {
+  /* ... tes tokens existants inchangés ... */
+}
+
+/* Tokens dédiés à la page Admin — héritent du thème global par défaut */
+:root {
+  --admin-bg: white;
+  --admin-surface: var(--color-surface);
+  --admin-surface-alt: #f9fafb;
+  --admin-text: var(--color-text);
+  --admin-text-muted: var(--color-text-muted);
+  --admin-primary: var(--color-primary);
+  --admin-primary-light: var(--color-primary-light);
+  --admin-accent: #ea02ff;
+  --admin-secondary: var(--color-secondary);
+  --admin-border: var(--color-secondary-light);
+  --admin-heading: black;
+  --admin-retarded: #ff0000;
+}
+
+@theme {
+  --color-admin-bg: var(--admin-bg);
+  --color-admin-surface: var(--admin-surface);
+  --color-admin-surface-alt: var(--admin-surface-alt);
+  --color-admin-text: var(--admin-text);
+  --color-admin-text-muted: var(--admin-text-muted);
+  --color-admin-primary: var(--admin-primary);
+  --color-admin-primary-light: var(--admin-primary-light);
+  --color-admin-accent: var(--admin-accent);
+  --color-admin-secondary: var(--admin-secondary);
+  --color-admin-border: var(--admin-border);
+  --color-admin-heading: var(--admin-heading);
+  --color-admin-retarded: var(--admin-retarded);
+}
+
+@layer components {
+  .admin-page {
+    @apply bg-admin-bg text-admin-text min-h-screen;
+  }
+  .admin-titre {
+    @apply text-2xl font-bold mb-6 text-admin-heading font-display;
+  }
+  .admin-sous-titre {
+    @apply font-semibold mb-3 text-admin-text;
+  }
+  .admin-texte-discret {
+    @apply text-sm text-admin-text-muted;
+  }
+  .admin-input {
+    @apply border border-admin-border bg-admin-surface text-admin-text rounded px-2 py-1 text-sm;
+  }
+  .admin-btn-primaire {
+    @apply bg-admin-primary hover:bg-admin-primary-light text-white rounded px-3 py-1 text-sm;
+  }
+  .admin-btn-danger {
+    @apply bg-admin-accent text-white rounded px-3 py-1 text-sm;
+  }
+  .admin-btn-secondaire {
+    @apply text-admin-text-muted text-sm hover:underline;
+  }
+  .admin-carte {
+    @apply bg-admin-surface-alt border border-admin-border rounded p-2;
+  }
+  .admin-carte-liste {
+    @apply bg-admin-surface border border-admin-border rounded max-h-40 overflow-y-auto;
+  }
+  .admin-item-liste {
+    @apply block w-full text-left px-2 py-1 text-sm hover:bg-admin-surface-alt text-admin-text;
+  }
+  .admin-message {
+    @apply mb-4 text-sm bg-admin-primary/10 text-admin-primary border border-admin-primary/30 rounded p-2;
+  }
+  .admin-ligne {
+    @apply border-b border-admin-border py-2;
+  }
+}
+
+
+
+
+
+
 /*
 :root {
   --text: #6b6375;

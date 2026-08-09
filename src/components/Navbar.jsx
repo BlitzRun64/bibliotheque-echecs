@@ -94,17 +94,22 @@ async function marquerNotifsLues() {
 
   return (
     <>
-      <nav className="bg-white border-b px-4 py-3 flex justify-between items-center relative">
-        <div className="flex gap-4 items-center">
-          <Link to="/" className="font-bold">♟️ Club d'échecs</Link>
-          <button onClick={() => setMenuMobileOuvert(!menuMobileOuvert)} className="sm:hidden text-2xl leading-none w-8 h-8 flex items-center justify-center">
-            {menuMobileOuvert ? '✕' : '☰'}
-          </button>
-          <div className="hidden sm:flex gap-4">
-            {onglets.map((o) => (
-              <Link key={o.to} to={o.to} className="text-sm text-gray-600 hover:text-black">{o.label}</Link>
-            ))}
-          </div>
+      <nav className="bg-nav-bg border-b border-secondary-light px-4 py-3 flex justify-between items-center relative">
+      <div className="flex gap-4 items-center">
+        <Link to="/" className="font-display font-bold text-nav-text">♟️ Club d'échecs</Link>
+        <button
+          onClick={() => setMenuMobileOuvert(!menuMobileOuvert)}
+          className="sm:hidden text-2xl leading-none w-8 h-8 flex items-center justify-center text-nav-text"
+        >
+          {menuMobileOuvert ? '✕' : '☰'}
+        </button>
+        <div className="hidden sm:flex gap-4">
+          {onglets.map((o) => (
+            <Link key={o.to} to={o.to} className="text-sm text-nav-text opacity-80 hover:opacity-100">
+              {o.label}
+            </Link>
+          ))}
+        </div>
         </div>
 
         <div className="flex items-center gap-4">
@@ -123,7 +128,7 @@ async function marquerNotifsLues() {
               </button>
 
               {menuDemandesOuvert && (
-                <div className="fixed sm:absolute left-1/2 sm:left-auto right-auto sm:right-0 -translate-x-1/2 sm:translate-x-0 top-16 sm:top-auto sm:mt-2 w-[90vw] sm:w-72 bg-white border rounded shadow-lg max-h-72 overflow-y-auto z-50">
+                <div className="fixed sm:absolute left-1/2 sm:left-auto right-auto sm:right-0 -translate-x-1/2 sm:translate-x-0 top-16 sm:top-auto sm:mt-2 w-[90vw] sm:w-72 bg-white border rounded shadow-lg max-h-72 overflow-y-auto z-50 ">
                   {profil?.est_admin && demandes.map((d) => (
                     <div key={d.id} className="p-3 border-b text-sm">
                       <strong>{d.nom_demandeur}</strong> veut emprunter <em>{d.livres?.titre}</em>
@@ -133,7 +138,7 @@ async function marquerNotifsLues() {
                     <div key={n.id} className="p-3 border-b text-sm">{n.message}</div>
                   ))}
                   {demandes.length === 0 && notifications.length === 0 && (
-                    <p className="text-sm text-gray-500 p-3">Rien de nouveau</p>
+                    <p className="text-sm text-color-text p-3">Rien de nouveau</p>
                   )}
                   {profil?.est_admin && (
                     <Link to="/admin" onClick={() => setMenuDemandesOuvert(false)} className="block text-center text-blue-600 text-sm p-2 hover:bg-gray-50">
@@ -147,7 +152,7 @@ async function marquerNotifsLues() {
 
           {session ? (
             <div className="relative" ref={refProfil}>
-              <button onClick={() => setMenuProfilOuvert(!menuProfilOuvert)} className="text-sm text-gray-700 flex items-center gap-1">
+              <button onClick={() => setMenuProfilOuvert(!menuProfilOuvert)} className="text-sm text-nav-text flex items-center gap-1">
                 {profil?.nom || '...'} ▾
               </button>
               {menuProfilOuvert && (
@@ -182,7 +187,7 @@ async function marquerNotifsLues() {
       {menuMobileOuvert && (
         <div className="sm:hidden fixed inset-0 top-[57px] bg-white z-40 flex flex-col">
           {onglets.map((o) => (
-            <Link key={o.to} to={o.to} onClick={() => setMenuMobileOuvert(false)} className="text-lg text-gray-800 border-b px-6 py-4">
+            <Link key={o.to} to={o.to} onClick={() => setMenuMobileOuvert(false)} className="text-lg text-nav-text border-b px-6 py-4">
               {o.label}
             </Link>
           ))}

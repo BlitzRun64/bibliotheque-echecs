@@ -12,6 +12,8 @@ export default function Bibliotheque() {
   const [utilisateur, setUtilisateur] = useState(null) // null = pas connecté
   const [profil, setProfil] = useState(null)
 
+  /*<option value="club1">Club 1 (contrasté)</option> */
+
   useEffect(() => {
     chargerLivres()
     chargerUtilisateur()
@@ -65,14 +67,14 @@ export default function Bibliotheque() {
 
   return (
     <div className="max-w-5xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Bibliothèque du club</h1>
+      <h1 className="text-3xl font-bold text-heading mb-4">Bibliothèque du club</h1>
 
       <input
         type="text"
         placeholder="Rechercher par titre, auteur ou thème..."
         value={recherche}
         onChange={(e) => setRecherche(e.target.value)}
-        className="border rounded px-3 py-2 mb-6 w-full max-w-md"
+        className="border border-secondary-light rounded px-3 py-2 mb-6 w-full max-w-md bg-surface"
       />
 
       {message && (
@@ -85,7 +87,7 @@ export default function Bibliotheque() {
         {livresFiltres.map((livre) => {
           const dejaDemande = demandesEnAttente.includes(livre.id)
           return (
-            <div key={livre.id} className="border rounded-lg p-4 shadow-sm flex gap-4">
+            <div key={livre.id} className="border border-secondary-light bg-surface rounded-lg p-4 shadow-sm flex gap-4">
               {livre.couverture_url ? (
                 <img src={livre.couverture_url} alt={livre.titre} className="w-20 h-28 object-cover rounded flex-shrink-0" />
               ) : (
@@ -95,10 +97,10 @@ export default function Bibliotheque() {
               )}
 
               <div className="flex-1 min-w-0">
-                <h2 className="font-semibold">{livre.titre}</h2>
-                <p className="text-sm text-gray-600">{livre.auteur}</p>
-                <p className="text-xs text-gray-400 mb-2">{livre.theme}</p>
-                <span className={`text-xs px-2 py-1 rounded ${livre.disponible ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                <h2 className="font-display font-semibold text-text">{livre.titre}</h2>
+                <p className="text-sm text-text-muted">{livre.auteur}</p>
+                <p className="text-sm text-text-muted mb-2">{livre.theme}</p>
+                <span className={`text-xs px-2 py-1 rounded ${livre.disponible ? 'bg-primary/10 text-primary' : 'bg-accent/10 text-accent'}`}>
                   {livre.disponible ? 'Disponible' : 'Emprunté'}
                 </span>
 
