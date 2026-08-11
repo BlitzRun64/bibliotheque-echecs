@@ -104,13 +104,13 @@ async function marquerNotifsLues() {
         <Link to="/" className="font-display font-bold text-nav-text">♟️ Club d'échecs</Link>
         <button
           onClick={() => setMenuMobileOuvert(!menuMobileOuvert)}
-          className="sm:hidden text-2xl leading-none w-8 h-8 flex items-center justify-center text-text-muted hover:text-text-muted-800 font-onglets"
+          className="sm:hidden text-2xl leading-none w-8 h-8 flex items-center justify-center "
         >
           {menuMobileOuvert ? '✕' : '☰'}
         </button>
-        <div className="hidden sm:flex gap-4">
+        <div className="hidden sm:flex gap-4 ">
           {onglets.map((o) => (
-            <Link key={o.to} to={o.to} className="text-sm text-nav-text opacity-80 hover:opacity-100">
+            <Link key={o.to} to={o.to} className="text-sm text-text-muted hover:text-text-muted-800 font-onglets opacity-80 hover:opacity-100">
               {o.label}
             </Link>
           ))}
