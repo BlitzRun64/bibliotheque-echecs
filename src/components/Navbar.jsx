@@ -193,7 +193,7 @@ async function marquerNotifsLues() {
       {menuMobileOuvert && (
         <div className="sm:hidden fixed inset-0 top-[57px] bg-white z-40 flex flex-col">
           {onglets.map((o) => (
-            <Link key={o.to} to={o.to} onClick={() => setMenuMobileOuvert(false)} className="text-lg text-nav-text border-b px-6 py-4">
+            <Link key={o.to} to={o.to} onClick={() => setMenuMobileOuvert(false)} className="text-lg font-onglets border-b px-6 py-4">
               {o.label}
             </Link>
           ))}
