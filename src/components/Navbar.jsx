@@ -110,7 +110,7 @@ async function marquerNotifsLues() {
         </button>
         <div className="hidden sm:flex gap-4 ">
           {onglets.map((o) => (
-            <Link key={o.to} to={o.to} className="text-sm text-text-muted hover:text-text-muted-800 font-onglets opacity-80 hover:opacity-100">
+            <Link key={o.to} to={o.to} className="text-sm text-black hover:text-gray-700 font-onglets opacity-80 hover:opacity-100">
               {o.label}
             </Link>
           ))}
