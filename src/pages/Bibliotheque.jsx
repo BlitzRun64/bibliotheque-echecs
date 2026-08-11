@@ -66,7 +66,29 @@ export default function Bibliotheque() {
   })
 
   return (
+    
     <div className="bg-black min-h-screen">
+      <div className="bg-[#073b14] w-full flex justify-center py-4">
+
+              
+                <div className="logo-perspective">
+                  <img
+                    src="/image/icon-192.png"
+                    alt="Logo"
+                    className="logo-3d w-40 h-40"
+                  />
+                </div>
+              
+
+      </div>
+                
+    
+    
+    
+
+
+
+
       <div className="bibliochess">
         <div className="relative overflow-hidden rounded-lg mb-6">
         <div className="absolute inset-0 motif-damier"></div>

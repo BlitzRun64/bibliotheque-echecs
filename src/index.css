@@ -233,11 +233,22 @@ color: #ffffff;}
 
 .logo-perspective {
   perspective: 800px;
+  animation: logo-deplacement 5s ease-in-out infinite alternate;
 }
 
 .logo-3d {
   animation: logo-3d 6s linear infinite;
   transform-style: preserve-3d;
+}
+
+@keyframes logo-deplacement {
+  from {
+    transform: translateX(-150px);
+  }
+
+  to {
+    transform: translateX(150px);
+  }
 }
 
 @keyframes logo-3d {

@@ -102,17 +102,7 @@ async function marquerNotifsLues() {
       <nav className="bg-nav-bg border-b border-secondary-light px-4 py-3 flex justify-between items-center relative">
       <div className="flex gap-4 items-center">
 
-        <Link to="/" > 
-
-       <div className="logo-perspective">
-        <img
-          src="/image/icon-192.png"
-          alt="Logo"
-          className="logo-3d w-32 h-32"
-        />
-       </div>
-
-       </Link>
+        
 
         <Link to="/" className="font-display font-bold text-nav-text">
 
