@@ -104,7 +104,7 @@ async function marquerNotifsLues() {
         <Link to="/" className="font-display font-bold text-nav-text">♟️ Club d'échecs</Link>
         <button
           onClick={() => setMenuMobileOuvert(!menuMobileOuvert)}
-          className="sm:hidden text-2xl leading-none w-8 h-8 flex items-center justify-center "
+          className="sm:hidden text-2xl leading-none w-8 h-8 flex items-center justify-center text-nav-text hover:text-nav-text-hover"
         >
           {menuMobileOuvert ? '✕' : '☰'}
         </button>
