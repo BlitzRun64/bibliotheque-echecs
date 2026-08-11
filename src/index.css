@@ -217,6 +217,40 @@ color: #ffffff;}
   } 
 }
 
+@keyframes rotation-logo {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.logo-tourne {
+  animation: rotation-logo 8s linear infinite;
+}
+
+.logo-perspective {
+  perspective: 800px;
+}
+
+.logo-3d {
+  animation: logo-3d 6s linear infinite;
+  transform-style: preserve-3d;
+}
+
+@keyframes logo-3d {
+  from {
+    transform: rotateY(0deg);
+  }
+
+  to {
+    transform: rotateY(360deg);
+  }
+}
+
+
 
 
 

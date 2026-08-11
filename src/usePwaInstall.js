@@ -5,16 +5,24 @@ export function usePwaInstall() {
   const [installe, setInstalle] = useState(false)
 
   useEffect(() => {
+    // Vérifie si l'application est déjà lancée en mode installé
+    const estInstallee =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      window.navigator.standalone === true
+
+    setInstalle(estInstallee)
+
     function gererPrompt(e) {
       e.preventDefault()
       setPromptEvent(e)
     }
-    window.addEventListener('beforeinstallprompt', gererPrompt)
 
     function gererInstalle() {
       setInstalle(true)
       setPromptEvent(null)
     }
+
+    window.addEventListener('beforeinstallprompt', gererPrompt)
     window.addEventListener('appinstalled', gererInstalle)
 
     return () => {
@@ -25,10 +33,21 @@ export function usePwaInstall() {
 
   async function lancerInstallation() {
     if (!promptEvent) return
+
     promptEvent.prompt()
-    await promptEvent.userChoice
+
+    const { outcome } = await promptEvent.userChoice
+
+    if (outcome === 'accepted') {
+      setInstalle(true)
+    }
+
     setPromptEvent(null)
   }
 
-  return { peutInstaller: !!promptEvent, installe, lancerInstallation }
+  return {
+    peutInstaller: !!promptEvent,
+    installe,
+    lancerInstallation,
+  }
 }

@@ -101,7 +101,49 @@ async function marquerNotifsLues() {
     <>
       <nav className="bg-nav-bg border-b border-secondary-light px-4 py-3 flex justify-between items-center relative">
       <div className="flex gap-4 items-center">
-        <Link to="/" className="font-display font-bold text-nav-text">♟️ Club d'échecs</Link>
+
+        <img
+          src="/image/icon-192.png"
+          alt="Logo"
+          className="animate-spin w-8 h-8"
+        />
+
+        
+        <img
+          src="/image/icon-192.png"
+          alt="Logo"
+          className="animate-spin w-32 h-32"
+        />
+
+        <img
+          src="/image/icon-192.png"
+          alt="Logo"
+          className="logo-tourne w-32 h-32"
+        />
+
+        <div className="logo-perspective">
+        <img
+          src="/image/icon-192.png"
+          alt="Logo"
+          className="logo-3d"
+        />
+       </div>
+
+       <div className="logo-perspective">
+        <img
+          src="/image/icon-192.png"
+          alt="Logo"
+          className="logo-3d w-32 h-32"
+        />
+       </div>
+
+        <Link to="/" className="font-display font-bold text-nav-text">
+
+        
+        
+        ♟️ Club d'échecs
+        
+        </Link>
         <button
           onClick={() => setMenuMobileOuvert(!menuMobileOuvert)}
           className="sm:hidden text-2xl leading-none w-8 h-8 flex items-center justify-center text-nav-text hover:text-nav-text-hover"
