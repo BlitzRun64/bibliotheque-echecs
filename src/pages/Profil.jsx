@@ -151,23 +151,25 @@ export default function Profil() {
         </div>
 
         <h2 className="text-lg font-semibold mb-4">Liste des livres</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className=" grid grid-cols-1 sm:grid-cols-2 gap-4">
           {livresEmpruntes.length === 0 && (
             <p className="text-lg text-white font-bold">Tu n'as aucun livre emprunté actuellement</p>
           )}
           {livresEmpruntes.map((livre) => (
-            <div key={livre.id} className="border rounded-lg p-4 shadow-sm flex gap-4">
+            <div key={livre.id} className="bg-surface border rounded-lg p-4 shadow-sm flex gap-4">
               {livre.couverture_url ? (
-                <img src={livre.couverture_url} alt={livre.titre} className="w-20 h-28 object-cover rounded flex-shrink-0" />
+                <div className="inline-block border-2 border-black">
+                  <img src={livre.couverture_url} alt={livre.titre} className="w-20 h-28 object-cover rounded flex-shrink-0" />
+                </div>
               ) : (
                 <div className="w-20 h-28 bg-gray-100 rounded flex-shrink-0 flex items-center justify-center text-gray-400 text-xs text-center">
                   Pas d'image
                 </div>
               )}
-              <div className="flex-1 min-w-0">
+              <div className=" flex-1 min-w-0">
                 <h3 className="font-semibold">{livre.titre}</h3>
-                <p className="text-sm text-gray-600">{livre.auteur}</p>
-                <p className="text-xs text-gray-400">{livre.theme}</p>
+                <p className="text-sm text-text-muted-600">{livre.auteur}</p>
+                <p className="text-xs text-text-muted-400">{livre.theme}</p>
               </div>
             </div>
           ))}

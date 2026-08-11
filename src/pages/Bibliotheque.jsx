@@ -91,9 +91,11 @@ export default function Bibliotheque() {
           {livresFiltres.map((livre) => {
             const dejaDemande = demandesEnAttente.includes(livre.id)
             return (
-              <div key={livre.id} className="border border-secondary-light bg-surface rounded-lg p-4 shadow-sm flex gap-4">
+              <div key={livre.id} className=" border-secondary-light bg-surface rounded-lg p-4 shadow-sm flex gap-4">
                 {livre.couverture_url ? (
-                  <img src={livre.couverture_url} alt={livre.titre} className="w-20 h-28 object-cover rounded flex-shrink-0" />
+                  <div className="inline-block border-2 border-black">
+                    <img src={livre.couverture_url} alt={livre.titre} className="w-20 h-28  object-cover  rounded flex-shrink-0" />
+                  </div>
                 ) : (
                   <div className="w-20 h-28 bg-gray-100 rounded flex-shrink-0 flex items-center justify-center text-gray-400 text-xs text-center">
                     Pas d'image
