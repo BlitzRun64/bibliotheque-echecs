@@ -1,4 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&display=swap');
 @import "tailwindcss";
+
 
 @theme {
   --color-primary: #073b14;
@@ -64,6 +66,13 @@
   padding: 1rem;
   background-color: var(--color-bg);
   color: var(--color-text);
+}
+
+
+.font-onglets {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 600;
+  letter-spacing: 0.03em;
 }
 
 .connexion {

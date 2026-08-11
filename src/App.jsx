@@ -10,6 +10,9 @@ import Profil from './pages/Profil'
 import UpdatePrompt from './components/UpdatePrompt'
 import MotDePasseOublie from './pages/MotDePasseOublie'
 import ReinitialiserMdp from './pages/ReinitialiserMdp'
+import Tournois from './pages/Tournois'
+import InterClub from './pages/InterClub'
+import Installation from './pages/Installation'
 
 
 function RouteProtegee({ children }) {
@@ -38,6 +41,9 @@ export default function App() {
         <Route path="/mot-de-passe-oublie" element={<MotDePasseOublie />} />
         <Route path="/reinitialiser-mdp" element={<ReinitialiserMdp />} />
         <Route path="/admin" element={<RouteProtegee><Admin /></RouteProtegee>} />
+        <Route path="/tournois" element={<Tournois />} />
+        <Route path="/inter-club" element={<InterClub />} />
+        <Route path="/installation" element={<Installation />} />
       </Routes>
     </BrowserRouter>
   )

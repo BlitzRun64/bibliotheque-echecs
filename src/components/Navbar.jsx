@@ -90,7 +90,12 @@ async function marquerNotifsLues() {
 }
 
 
-  const onglets = [{ label: 'Bibliothèque', to: '/' }]
+  const onglets = [
+  { label: 'Bibliothèque', to: '/' },
+  { label: 'Tournois', to: '/tournois' },
+  { label: 'Inter-club', to: '/inter-club' },
+  { label: 'Installer l\'app', to: '/installation' },
+]
 
   return (
     <>
@@ -99,7 +104,7 @@ async function marquerNotifsLues() {
         <Link to="/" className="font-display font-bold text-nav-text">♟️ Club d'échecs</Link>
         <button
           onClick={() => setMenuMobileOuvert(!menuMobileOuvert)}
-          className="sm:hidden text-2xl leading-none w-8 h-8 flex items-center justify-center text-nav-text"
+          className="sm:hidden text-2xl leading-none w-8 h-8 flex items-center justify-center text-text-muted hover:text-text-muted-800 font-onglets"
         >
           {menuMobileOuvert ? '✕' : '☰'}
         </button>

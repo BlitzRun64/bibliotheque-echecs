@@ -150,7 +150,7 @@ export default function Profil() {
         <h1 className="z-10 relative text-center text-lg font-bold text-heading  p-4"><mark className  = "StitreB">Liste des livres </mark></h1>
         </div>
 
-        <h2 className="text-lg font-semibold mb-4">Liste des livres</h2>
+        
         <div className=" grid grid-cols-1 sm:grid-cols-2 gap-4">
           {livresEmpruntes.length === 0 && (
             <p className="text-lg text-white font-bold">Tu n'as aucun livre emprunté actuellement</p>
