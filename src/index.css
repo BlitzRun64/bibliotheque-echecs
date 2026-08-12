@@ -39,7 +39,7 @@
   --color-primary-light: #5322c5;
   --color-secondary: #806b6b;
   --color-secondary-light: #3f3f3f;
-  --color-accent: #d424a5;
+  --color-accent: #ac0c31;
   --color-bg: #0d0d0d;
   --color-surface: #ebe3ec;
   --color-text: #030202;
@@ -60,6 +60,15 @@
 }
 
 .bibliochess {
+  max-width: 64rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 1rem;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+.inter-club {
   max-width: 64rem;
   margin-left: auto;
   margin-right: auto;

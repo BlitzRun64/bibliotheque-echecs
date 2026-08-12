@@ -315,12 +315,12 @@ export default function Admin() {
                         </span>
                       ) : (
                         <span className="text-admin-text-muted text-sm">
-                          <span className="text-admin-accent font-bold text-sm">
-                          (emprunté{l.emprunteur_nom ? ` par ${l.emprunteur_nom}` : ''}
+                          <span className="text-accent font-bold text-sm">
+                          emprunté{l.emprunteur_nom ? ` par ${l.emprunteur_nom}` : ''}
                           <br/>
                           </span>
                           
-                          {l.date_limite ? ` — à rendre avant le ${new Date(l.date_limite).toLocaleDateString('fr-FR')}` : ''})
+                          {l.date_limite ? ` — à rendre avant le ${new Date(l.date_limite).toLocaleDateString('fr-FR')}` : ''}
                         </span>
                       )}
                     </span>

@@ -95,6 +95,7 @@ async function marquerNotifsLues() {
   { label: 'Tournois', to: '/tournois' },
   { label: 'Inter-club', to: '/inter-club' },
   { label: 'Installer l\'app', to: '/installation' },
+  { label: 'Administrer', to: '/admin'}
 ]
 
   return (
@@ -104,7 +105,7 @@ async function marquerNotifsLues() {
 
         
 
-        <Link to="/" className="font-display font-bold text-nav-text">
+        <Link to="https://www.echecs.asso.fr/FicheClub.aspx?Ref=213" className="font-display font-bold text-nav-text">
 
         
         

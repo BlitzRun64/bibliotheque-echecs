@@ -11,6 +11,7 @@ export default function Bibliotheque() {
   const [message, setMessage] = useState('')
   const [utilisateur, setUtilisateur] = useState(null) // null = pas connecté
   const [profil, setProfil] = useState(null)
+  const [visible, setVisible] = useState(true)
 
   /*<option value="club1">Club 1 (contrasté)</option> */
 
@@ -71,7 +72,8 @@ export default function Bibliotheque() {
       <div className="bg-[#073b14] w-full flex justify-center py-4">
 
               
-                <div className="logo-perspective">
+                <div className="logo-perspective" cursor-pointer>
+                  
                   <img
                     src="/image/icon-192.png"
                     alt="Logo"
