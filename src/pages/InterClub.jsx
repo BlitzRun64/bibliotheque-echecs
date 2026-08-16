@@ -112,10 +112,31 @@ export default function InterClub() {
     `${j.nom} ${j.prenom}`.toLowerCase().includes(rechercheJoueur.toLowerCase())
   )
 
+  const x = 210
+
   function TableauEquipe({ equipe }) {
     return (
       <div className="mb-10">
-        <h2 className="font-semibold text-text mb-3">Équipe {equipe}</h2>
+        <div className="relative overflow-hidden rounded-lg mb-6 text-whie">
+          
+          <div className="absolute  "
+              style={{
+            left: `${x}px`,
+            
+          }}
+          > 
+          
+            <a href="https://www.echecs.asso.fr/Equipes.aspx">
+              <img
+                      src="/image/logo ffe.png"
+                      alt="Logo ffe"
+                      className="logo-2d w-10 h-10"
+                    />
+            </a>
+          </div>
+          <h2 className="font-semibold text-white mb-3">Équipe {equipe} | lien vers la ffe ➡️</h2>
+        </div>
+        <span className="font-semibold text-white">  {compositions.filter(c => c.equipe === 1 && c.joueur_id).length} / {NB_POSITIONS} joueurs assignés </span> 
         <div className="overflow-x-auto">
           <table className="w-full text-sm border border-secondary-light bg-surface rounded-lg overflow-hidden">
             <thead>
@@ -210,13 +231,16 @@ export default function InterClub() {
         {profil?.est_admin && (
           <button
             onClick={() => setMenuJoueursOuvert(true)}
-            className="bg-secondary text-white rounded px-3 py-2 text-sm"
+            className="bg-secondary text-black rounded px-3 py-2 text-sm"
           >
             👥 Gérer les joueurs
           </button>
         )}
       </div>
-
+        
+            
+           
+       
       <TableauEquipe equipe={1} />
       <TableauEquipe equipe={2} />
 
