@@ -33,7 +33,7 @@ function SectionDepartement({ departement, ouvert, onToggle, liens, estAdmin, on
           <img src={departement.image} alt={departement.nom} className="w-12 h-12 object-cover rounded" />
         </a>
         <button onClick={onToggle} className="flex-1 flex items-center justify-between text-left">
-          <span className=" font-semibold text-text" >{departement.nom}</span>
+          <span className=" font-semibold text-text text-white" >{departement.nom}</span>
           <span className="absolute text-xs, border border-blue bg-black text-white rounded-full px-2 py-1 " style={{right: `${x}px`,}}>
           {liens.length}
           </span>

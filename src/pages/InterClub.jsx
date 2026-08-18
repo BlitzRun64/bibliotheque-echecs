@@ -113,7 +113,29 @@ export default function InterClub() {
   )
 
   const x = 210
+  function Etude_Equipe(){
+    function handleChange(e) {
+      const lien = e.target.value;
 
+      if (lien) {
+        window.location.href =lien; } }
+
+      
+    return (
+      <div className="bg-white font-semibold w-[500px] ml-auto">
+        
+        <select onChange={handleChange} className="bg-white text-semibold">
+          <option value="">Choisir pour visiter une année d'étude</option>
+          <option value="https://lichess.org/study/gl7K2Vbx/boP8mLBY">2027</option>
+          <option value="https://lichess.org/study/FDeDrUUt">2026</option>
+          <option value="https://lichess.org/study/kBVhjsKp">2025</option>
+          
+        </select>
+        
+
+      </div>
+    )
+  }
   function TableauEquipe({ equipe }) {
     return (
       <div className="mb-10">
@@ -222,7 +244,7 @@ export default function InterClub() {
           <mark className="StitreB">Inter-club</mark>
         </h1>
       </div>
-
+      <Etude_Equipe />
       <div className="flex flex-wrap justify-between items-center gap-2 mb-6">
         <input
           value={ronde}
@@ -238,10 +260,11 @@ export default function InterClub() {
           </button>
         )}
       </div>
+
         
             
            
-       
+      
       <TableauEquipe equipe={1} />
       <TableauEquipe equipe={2} />
 
