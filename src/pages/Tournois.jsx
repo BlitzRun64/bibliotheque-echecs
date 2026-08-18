@@ -118,7 +118,7 @@ export default function Tournois() {
   }
 
   return (
-    <div className="bg-black">
+    <div className="bg-black min-h-screen">
       <div className="bg-black max-w-4xl mx-auto p-4">
         <div className="relative overflow-hidden rounded-lg mb-6">
           <div className="absolute inset-0 motif-damier"></div>
