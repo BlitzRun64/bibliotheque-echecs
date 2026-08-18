@@ -122,7 +122,7 @@ export default function InterClub() {
 
       
     return (
-      <div className="bg-white font-semibold w-[500px] ml-auto">
+      <div className="bg-white font-semibold w-[300px] ml-auto mb-4">
         
         <select onChange={handleChange} className="bg-white text-semibold">
           <option value="">Choisir pour visiter une année d'étude</option>
