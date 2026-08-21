@@ -15,6 +15,8 @@ export default function Navbar() {
   const [notifications, setNotifications] = useState([])
   const refDemandes = useRef(null)
   const refProfil = useRef(null)
+  const audioRef = useRef(null)
+const [musiqueActive, setMusiqueActive] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session))
@@ -89,6 +91,16 @@ async function marquerNotifsLues() {
   await supabase.from('notifications').update({ lue: true }).in('id', idsAMarquer)
 }
 
+function lancerMusique() {
+  audioRef.current.play()
+  setMusiqueActive(true)
+}
+
+function arreterMusique() {
+  audioRef.current.pause()
+  setMusiqueActive(false)
+}
+
 
   const onglets = [
   { label: 'Bibliothèque', to: '/' },
@@ -128,6 +140,17 @@ async function marquerNotifsLues() {
         </div>
 
         <div className="flex items-center gap-4">
+
+           <audio ref={audioRef} loop>
+            <source src="/music/Neon.mp3" type="audio/mpeg" />
+          </audio>
+          <button
+            onClick={musiqueActive ? arreterMusique : lancerMusique}
+            className="text-xl leading-none  ${musiqueActive ? 'animate-pulse' : ''}"
+            title={musiqueActive ? 'Couper la musique' : 'Lancer la musique'}
+          >
+            {musiqueActive ? '🔇' : '🎵'}
+          </button>
           {session && (
             <div className="relative"  ref={refDemandes}>
               <button

@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useEffect, useState , useRef } from 'react'
 import { supabase } from './supabaseClient'
 import Navbar from './components/Navbar'
 import Bibliotheque from './pages/Bibliotheque'
@@ -28,8 +28,16 @@ function RouteProtegee({ children }) {
 
 
 
+
+
 export default function App() {
+
+ 
   return (
+    
+     
+
+
     <BrowserRouter>
       <Navbar />
       <Routes>

@@ -1,7 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { supabase } from '../supabaseClient'
 
+
+
+
+  
+
 export default function Bibliotheque() {
+  const audioRef = useRef(null)
   const [livres, setLivres] = useState([])
   const [recherche, setRecherche] = useState('')
   const [demandesEnAttente, setDemandesEnAttente] = useState([])
@@ -19,6 +25,11 @@ export default function Bibliotheque() {
     chargerLivres()
     chargerUtilisateur()
   }, [])
+
+  function lancerMusique(){
+   
+    audioRef.current.play();
+  }
 
   async function chargerLivres() {
     const { data, error } = await supabase.from('livres').select('*').order('titre')
@@ -83,6 +94,7 @@ export default function Bibliotheque() {
               
 
       </div>
+      
                 
     
     
