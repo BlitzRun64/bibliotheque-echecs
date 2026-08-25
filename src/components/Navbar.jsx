@@ -16,7 +16,12 @@ export default function Navbar() {
   const refDemandes = useRef(null)
   const refProfil = useRef(null)
   const audioRef = useRef(null)
-const [musiqueActive, setMusiqueActive] = useState(false)
+  const [musiqueActive, setMusiqueActive] = useState(false)
+  const [playlist, setplaylist] = useState([])
+  const [IndexMorceau, setIndexMorceau] = useState(0)
+  const [MenuPlaylistOuverte, setMenuPlaylistOuverte] = useState(false)
+
+  useEffect(()=> {chargerPlaylist()},[])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session))
@@ -91,15 +96,62 @@ async function marquerNotifsLues() {
   await supabase.from('notifications').update({ lue: true }).in('id', idsAMarquer)
 }
 
+async function chargerPlaylist() {
+  const { data, error } = await supabase
+    .from('playlist')
+    .select('*')
+    .order('ordre', { ascending: true })
+
+  if (error) {
+    console.error('Erreur lors du chargement de la playlist :', error)
+    return
+  }
+
+  console.log('Playlist chargée :', data)
+
+  setplaylist(data || [])
+}
+
 function lancerMusique() {
-  audioRef.current.play()
-  setMusiqueActive(true)
+  if (!audioRef.current) return
+
+  audioRef.current
+    .play()
+    .then(() => {
+      setMusiqueActive(true)
+    })
+    .catch((error) => {
+      console.error('Impossible de lancer la musique :', error)
+    })
 }
 
 function arreterMusique() {
+  if (!audioRef.current) return
+
   audioRef.current.pause()
   setMusiqueActive(false)
 }
+
+function morceauSuivant() {
+  if (playlist.length === 0) return
+
+  setIndexMorceau((i) => (i + 1) % playlist.length)
+}
+
+function jouerMorceau(i) {
+  setIndexMorceau(i)
+  setMusiqueActive(true)
+}
+
+useEffect(() => {
+  if (musiqueActive && audioRef.current) {
+    audioRef.current
+      .play()
+      .catch((error) => {
+        console.error('Impossible de lire le morceau :', error)
+      })
+  }
+}, [IndexMorceau, musiqueActive])
 
 
   const onglets = [
@@ -140,17 +192,56 @@ function arreterMusique() {
         </div>
 
         <div className="flex items-center gap-4">
+          {playlist.length > 0 && (
+              <audio
+                ref={audioRef}
+                src={playlist[IndexMorceau]?.fichier_url}
+                onEnded={morceauSuivant}
+              />
+            )}
 
-           <audio ref={audioRef} loop>
-            <source src="/music/Neon.mp3" type="audio/mpeg" />
-          </audio>
+           
+          
           <button
-            onClick={musiqueActive ? arreterMusique : lancerMusique}
-            className="text-xl leading-none  ${musiqueActive ? 'animate-pulse' : ''}"
-            title={musiqueActive ? 'Couper la musique' : 'Lancer la musique'}
-          >
-            {musiqueActive ? '🔇' : '🎵'}
-          </button>
+              onClick={musiqueActive ? arreterMusique : lancerMusique}
+              className={`text-xl leading-none ${
+                musiqueActive ? 'animate-pulse' : ''
+              }`}
+              title={musiqueActive ? 'Couper la musique' : 'Lancer la musique'}
+              disabled={playlist.length === 0}
+            >
+              {musiqueActive ? '🔇' : '🎵'}
+            </button>
+
+
+          {playlist.length > 0 && (
+              <button
+                onClick={() => setMenuPlaylistOuverte(!MenuPlaylistOuverte)}
+                className="text-sm text-nav-text opacity-70"
+                title="Voir la playlist"
+              >
+                ▾
+              </button>
+            )}
+
+              {MenuPlaylistOuverte && (
+                <div className="absolute right-0 top-8 w-64 bg-surface text-text border border-secondary-light rounded shadow-lg max-h-72 overflow-y-auto z-50">
+                  {playlist.map((morceau, i) => (
+                    <button
+                      key={morceau.id}
+                      onClick={() => { jouerMorceau(i); setMenuPlaylistOuverte(false) }}
+                      className={`block w-full text-left px-3 py-2 text-sm hover:bg-primary/10 ${i === IndexMorceau ? 'font-semibold text-primary' : ''}`}
+                    >
+                      {i === IndexMorceau && musiqueActive ? '▶ ' : ''}{morceau.titre}
+                    </button>
+                  ))}
+                </div>
+              )}
+       
+
+
+
+
           {session && (
             <div className="relative"  ref={refDemandes}>
               <button
