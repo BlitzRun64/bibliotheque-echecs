@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../supabaseClient'
+import { DndContext, useDraggable } from '@dnd-kit/core'
 
 const TAILLE_CASE = 24 // pixels par unité de grille
 
@@ -19,17 +20,83 @@ export default function Plan_de_Table() {
   const [zoom, setZoom] = useState(1)
   const [erreur, setErreur] = useState(null)
 
+  const [tables, setTables] = useState([])
+  const [largeurTableInput, setLargeurTableInput] = useState(4)
+  const [longueurTableInput, setLongueurTableInput] = useState(2)
+  const [tableSelectionneeId, setTableSelectionneeId] = useState(null)
+
   useEffect(() => { chargerEvenements() }, [])
+
+
   useEffect(() => {
     setCarteId(null)
     setCarte(null)
     if (evenementId) chargerCartes()
     else setCartes([])
   }, [evenementId])
+
+
   useEffect(() => {
     const c = cartes.find((c) => c.id === carteId)
     setCarte(c || null)
   }, [carteId, cartes])
+
+  useEffect(() => {
+  if (carte) chargerTables()
+  else setTables([])
+}, [carte])
+
+
+
+
+    async function chargerTables() {
+    setErreur(null)
+    const { data, error } = await supabase
+        .from('pt_table')
+        .select('*')
+        .eq('map_id', carte.id)
+    if (error) { setErreur(error.message); return }
+    setTables(data || [])
+    }
+
+    async function ajouterTable() {
+        const largeur = parseInt(largeurTableInput, 10)
+        const longueur = parseInt(longueurTableInput, 10)
+        if (!carte || !largeur || !longueur || largeur < 1 || longueur < 1) return
+        setErreur(null)
+
+        const { data, error } = await supabase
+            .from('pt_table')
+            .insert({
+            map_id: carte.id,
+            largeur,
+            longueur,
+            x: 0,
+            y: 0,
+            rotation: 0,
+            statut: 'vide'
+            })
+            .select()
+            .single()
+
+        if (error) { setErreur(error.message); return }
+        setTables((prev) => [...prev, data])
+        }
+
+    async function supprimerTable(id) {
+        setErreur(null)
+        const { error } = await supabase.from('pt_table').delete().eq('id', id)
+        if (error) { setErreur(error.message); return }
+        setTables((prev) => prev.filter((t) => t.id !== id))
+        if (tableSelectionneeId === id) setTableSelectionneeId(null)
+        }
+
+    const couleurStatut = {
+        vide: '#ef4444',      // rouge
+        ok: '#22c55e',        // vert
+        reflexion: '#f97316', // orange
+        warning: '#eab308'    // jaune
+        }
 
   async function chargerEvenements() {
     setErreur(null)
@@ -54,6 +121,37 @@ export default function Plan_de_Table() {
     await chargerEvenements()
     setEvenementId(data.id)
   }
+
+    async function deplacerTable(id, x, y) {
+        setErreur(null)
+        const { data, error } = await supabase
+            .from('pt_table')
+            .update({ x, y })
+            .eq('id', id)
+            .select()
+            .single()
+
+        if (error) { setErreur(error.message); return }
+        setTables((prev) => prev.map((t) => (t.id === id ? data : t)))
+        }
+
+    function gererFinDrag(event, tailleCasePx) {
+        const { active, delta } = event
+        const table = tables.find((t) => t.id === active.id)
+        if (!table) return
+
+        const deltaXCases = delta.x / tailleCasePx
+        const deltaYCases = delta.y / tailleCasePx
+
+        let nouveauX = Math.round(table.x + deltaXCases)
+        let nouveauY = Math.round(table.y + deltaYCases)
+
+        // Empêcher de sortir de la carte
+        nouveauX = Math.max(0, Math.min(nouveauX, carte.largeur_map - table.largeur))
+        nouveauY = Math.max(0, Math.min(nouveauY, carte.longueur_map - table.longueur))
+
+        deplacerTable(table.id, nouveauX, nouveauY)
+    }
 
   async function chargerCartes() {
     setErreur(null)
@@ -114,8 +212,8 @@ export default function Plan_de_Table() {
     }
   }, [carte])
 
-  const largeurPx = carte ? carte.largeur_map * TAILLE_CASE * zoom : 0
-  const hauteurPx = carte ? carte.longueur_map * TAILLE_CASE * zoom : 0
+const largeurPx = carte ? carte.largeur_map * TAILLE_CASE * zoom : 0
+const hauteurPx = carte ? carte.longueur_map * TAILLE_CASE * zoom : 0
 
   return (
     <div className="p-4 max-w-6xl mx-auto">
@@ -210,6 +308,46 @@ export default function Plan_de_Table() {
             )}
 
             {carte && (
+                <div className="flex flex-wrap gap-2 items-center mb-4">
+                    <label className="text-sm">
+                    Table — largeur
+                    <input
+                        type="number"
+                        min="1"
+                        value={largeurTableInput}
+                        onChange={(e) => setLargeurTableInput(e.target.value)}
+                        className="border rounded px-2 py-1 ml-2 w-16 text-sm"
+                    />
+                    </label>
+                    <label className="text-sm">
+                    longueur
+                    <input
+                        type="number"
+                        min="1"
+                        value={longueurTableInput}
+                        onChange={(e) => setLongueurTableInput(e.target.value)}
+                        className="border rounded px-2 py-1 ml-2 w-16 text-sm"
+                    />
+                    </label>
+                    <button
+                    onClick={ajouterTable}
+                    className="bg-primary text-white text-sm px-3 py-1 rounded"
+                    >
+                    Ajouter une table
+                    </button>
+
+                    {tableSelectionneeId && (
+                    <button
+                        onClick={() => supprimerTable(tableSelectionneeId)}
+                        className="border border-red-400 text-red-600 text-sm px-3 py-1 rounded"
+                    >
+                        Supprimer la table sélectionnée
+                    </button>
+                    )}
+                </div>
+                )}
+
+            {carte && (
               <div className="flex items-center gap-2 ml-auto">
                 <button onClick={() => setZoom((z) => Math.max(0.25, z - 0.25))} className="border rounded px-2 text-sm">-</button>
                 <span className="text-sm">{Math.round(zoom * 100)}%</span>
@@ -221,13 +359,28 @@ export default function Plan_de_Table() {
           {/* Grille SVG */}
           {carte && (
             <div className="border border-secondary-light rounded overflow-auto" style={{ maxHeight: '70vh' }}>
-              <svg width={largeurPx} height={hauteurPx}>
-                <GrilleSVG
-                  largeurCases={carte.largeur_map}
-                  longueurCases={carte.longueur_map}
-                  tailleCase={TAILLE_CASE * zoom}
-                />
-              </svg>
+              <DndContext onDragEnd={(e) => gererFinDrag(e, TAILLE_CASE * zoom)}>
+                <div style={{ position: 'relative', width: largeurPx, height: hauteurPx }}>
+                    <svg width={largeurPx} height={hauteurPx} style={{ position: 'absolute', top: 0, left: 0 }}>
+                    <GrilleSVG
+                        largeurCases={carte.largeur_map}
+                        longueurCases={carte.longueur_map}
+                        tailleCase={TAILLE_CASE * zoom}
+                    />
+                    </svg>
+
+                    {tables.map((table) => (
+                    <TableDraggable
+                        key={table.id}
+                        table={table}
+                        tailleCasePx={TAILLE_CASE * zoom}
+                        selectionnee={tableSelectionneeId === table.id}
+                        onSelect={setTableSelectionneeId}
+                        couleur={couleurStatut[table.statut] || couleurStatut.vide}
+                    />
+                    ))}
+                </div>
+                </DndContext>
             </div>
           )}
         </>
@@ -268,4 +421,44 @@ function GrilleSVG({ largeurCases, longueurCases, tailleCase }) {
   }
 
   return <>{lignes}</>
+}
+
+function TableDraggable({ table, tailleCasePx, selectionnee, onSelect, couleur }) {
+  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+    id: table.id
+  })
+
+  const style = {
+    position: 'absolute',
+    left: table.x * tailleCasePx,
+    top: table.y * tailleCasePx,
+    width: table.largeur * tailleCasePx,
+    height: table.longueur * tailleCasePx,
+    backgroundColor: couleur,
+    border: selectionnee ? '3px solid #000' : '1px solid #374151',
+    boxSizing: 'border-box',
+    cursor: 'grab',
+    touchAction: 'none', // essentiel pour le tactile : empêche le scroll pendant le drag
+    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '11px',
+    color: '#111',
+    padding: '2px',
+    textAlign: 'center',
+    userSelect: 'none'
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      onClick={() => onSelect(table.id)}
+      {...listeners}
+      {...attributes}
+    >
+      {table.largeur}×{table.longueur}
+    </div>
+  )
 }
