@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../supabaseClient'
-import { DndContext, useDraggable } from '@dnd-kit/core'
+import { DndContext, useDraggable , useSensor , useSensors, PointerSensor} from '@dnd-kit/core'
 
 const TAILLE_CASE = 24 // pixels par unité de grille
 
 export default function Plan_de_Table() {
+
   const [evenements, setEvenements] = useState([])
   const [evenementId, setEvenementId] = useState(null)
   const [nouvelEvenement, setNouvelEvenement] = useState('')
@@ -24,6 +25,13 @@ export default function Plan_de_Table() {
   const [largeurTableInput, setLargeurTableInput] = useState(4)
   const [longueurTableInput, setLongueurTableInput] = useState(2)
   const [tableSelectionneeId, setTableSelectionneeId] = useState(null)
+  const sensors = useSensors(
+  useSensor(PointerSensor, {
+    activationConstraint: {
+      distance: 8 // pixels à parcourir avant de considérer que c'est un drag
+    }
+  })
+)
 
   useEffect(() => { chargerEvenements() }, [])
 
@@ -359,7 +367,7 @@ const hauteurPx = carte ? carte.longueur_map * TAILLE_CASE * zoom : 0
           {/* Grille SVG */}
           {carte && (
             <div className="border border-secondary-light rounded overflow-auto" style={{ maxHeight: '70vh' }}>
-              <DndContext onDragEnd={(e) => gererFinDrag(e, TAILLE_CASE * zoom)}>
+              <DndContext sensors={sensors} onDragEnd={(e) => gererFinDrag(e, TAILLE_CASE * zoom)}>
                 <div style={{ position: 'relative', width: largeurPx, height: hauteurPx }}>
                     <svg width={largeurPx} height={hauteurPx} style={{ position: 'absolute', top: 0, left: 0 }}>
                     <GrilleSVG
