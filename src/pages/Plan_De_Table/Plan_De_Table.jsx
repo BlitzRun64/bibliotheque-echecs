@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState , useRef} from 'react'
 import { supabase } from '../../supabaseClient'
 import { DndContext, useDraggable , useSensor , useSensors, PointerSensor} from '@dnd-kit/core'
 
@@ -20,6 +20,8 @@ export default function Plan_de_Table() {
 
   const [zoom, setZoom] = useState(1)
   const [erreur, setErreur] = useState(null)
+  const [panneauOuvert, setPanneauOuvert] = useState(false)
+  const refPanneau = useRef(null)
 
   const [tables, setTables] = useState([])
   const [largeurTableInput, setLargeurTableInput] = useState(4)
@@ -53,6 +55,17 @@ export default function Plan_de_Table() {
   if (carte) chargerTables()
   else setTables([])
 }, [carte])
+
+useEffect(() => {
+  function gererClicExterieur(e) {
+    if (refPanneau.current && !refPanneau.current.contains(e.target)) {
+      setPanneauOuvert(false)
+      setTableSelectionneeId(null)
+    }
+  }
+  document.addEventListener('mousedown', gererClicExterieur)
+  return () => document.removeEventListener('mousedown', gererClicExterieur)
+}, [])
 
 
 
@@ -161,6 +174,11 @@ export default function Plan_de_Table() {
         deplacerTable(table.id, nouveauX, nouveauY)
     }
 
+    function fermerPanneau() {
+      setPanneauOuvert(false)
+      setTableSelectionneeId(null)
+    }
+
   async function chargerCartes() {
     setErreur(null)
     const { data, error } = await supabase
@@ -222,179 +240,222 @@ export default function Plan_de_Table() {
 
 const largeurPx = carte ? carte.largeur_map * TAILLE_CASE * zoom : 0
 const hauteurPx = carte ? carte.longueur_map * TAILLE_CASE * zoom : 0
+const tableSelectionnee = tables.find((t) => t.id === tableSelectionneeId) || null
 
   return (
-    <div className="p-4 max-w-6xl mx-auto">
-      <h1 className="text-xl font-display font-bold mb-4">Plan de table</h1>
+     <div className="p-4 max-w-7xl mx-auto flex gap-4">
 
-      {erreur && (
-        <div className="bg-red-100 text-red-700 text-sm px-3 py-2 rounded mb-4">
-          Erreur : {erreur}
-        </div>
-      )}
+            <div className="flex-1 min-w-0">
+              <h1 className="text-xl font-display font-bold mb-4">Plan de table</h1>
 
-      {/* Sélection / création d'événement */}
-      <div className="flex flex-wrap gap-2 items-center mb-4">
-        <select
-          value={evenementId || ''}
-          onChange={(e) => setEvenementId(e.target.value || null)}
-          className="border rounded px-2 py-1 text-sm"
-        >
-          <option value="">— Choisir un événement —</option>
-          {evenements.map((ev) => (
-            <option key={ev.id} value={ev.id}>{ev.nom}</option>
-          ))}
-        </select>
-
-        <input
-          type="text"
-          value={nouvelEvenement}
-          onChange={(e) => setNouvelEvenement(e.target.value)}
-          placeholder="Nom du nouvel événement"
-          className="border rounded px-2 py-1 text-sm"
-        />
-        <button
-          onClick={creerEvenement}
-          className="bg-primary text-white text-sm px-3 py-1 rounded"
-        >
-          Créer
-        </button>
-      </div>
-
-      {evenementId && (
-        <>
-          {/* Sélection de carte */}
-          <div className="flex flex-wrap gap-2 items-center mb-4">
-            <select
-              value={carteId || ''}
-              onChange={(e) => setCarteId(e.target.value || null)}
-              className="border rounded px-2 py-1 text-sm"
-            >
-              <option value="">— Choisir une carte —</option>
-              {cartes.map((c) => (
-                <option key={c.id} value={c.id}>{c.nom}</option>
-              ))}
-            </select>
-
-            <input
-              type="text"
-              value={nomCarteInput}
-              onChange={(e) => setNomCarteInput(e.target.value)}
-              placeholder="Nom (ex: Jour 1)"
-              className="border rounded px-2 py-1 text-sm w-32"
-            />
-            <input
-              type="number"
-              min="1"
-              value={largeurInput}
-              onChange={(e) => setLargeurInput(e.target.value)}
-              className="border rounded px-2 py-1 w-20 text-sm"
-              title="Largeur (cases)"
-            />
-            <input
-              type="number"
-              min="1"
-              value={longueurInput}
-              onChange={(e) => setLongueurInput(e.target.value)}
-              className="border rounded px-2 py-1 w-20 text-sm"
-              title="Longueur (cases)"
-            />
-            <button
-              onClick={creerCarte}
-              className="bg-primary text-white text-sm px-3 py-1 rounded"
-            >
-              Nouvelle carte
-            </button>
-
-            {carte && (
-              <button
-                onClick={majTailleCarte}
-                className="border text-sm px-3 py-1 rounded"
-              >
-                Redimensionner "{carte.nom}"
-              </button>
-            )}
-
-            {carte && (
-                <div className="flex flex-wrap gap-2 items-center mb-4">
-                    <label className="text-sm">
-                    Table — largeur
-                    <input
-                        type="number"
-                        min="1"
-                        value={largeurTableInput}
-                        onChange={(e) => setLargeurTableInput(e.target.value)}
-                        className="border rounded px-2 py-1 ml-2 w-16 text-sm"
-                    />
-                    </label>
-                    <label className="text-sm">
-                    longueur
-                    <input
-                        type="number"
-                        min="1"
-                        value={longueurTableInput}
-                        onChange={(e) => setLongueurTableInput(e.target.value)}
-                        className="border rounded px-2 py-1 ml-2 w-16 text-sm"
-                    />
-                    </label>
-                    <button
-                    onClick={ajouterTable}
-                    className="bg-primary text-white text-sm px-3 py-1 rounded"
-                    >
-                    Ajouter une table
-                    </button>
-
-                    {tableSelectionneeId && (
-                    <button
-                        onClick={() => supprimerTable(tableSelectionneeId)}
-                        className="border border-red-400 text-red-600 text-sm px-3 py-1 rounded"
-                    >
-                        Supprimer la table sélectionnée
-                    </button>
-                    )}
+              {erreur && (
+                <div className="bg-red-100 text-red-700 text-sm px-3 py-2 rounded mb-4">
+                  Erreur : {erreur}
+                  
                 </div>
-                )}
+              )}
 
-            {carte && (
-              <div className="flex items-center gap-2 ml-auto">
-                <button onClick={() => setZoom((z) => Math.max(0.25, z - 0.25))} className="border rounded px-2 text-sm">-</button>
-                <span className="text-sm">{Math.round(zoom * 100)}%</span>
-                <button onClick={() => setZoom((z) => Math.min(3, z + 0.25))} className="border rounded px-2 text-sm">+</button>
+              {/* Sélection / création d'événement */}
+              <div className="flex flex-wrap gap-2 items-center mb-4">
+                <select
+                  value={evenementId || ''}
+                  onChange={(e) => setEvenementId(e.target.value || null)}
+                  className="border rounded px-2 py-1 text-sm"
+                >
+                  <option value="">— Choisir un événement —</option>
+                  {evenements.map((ev) => (
+                    <option key={ev.id} value={ev.id}>{ev.nom}</option>
+                  ))}
+                </select>
+
+                <input
+                  type="text"
+                  value={nouvelEvenement}
+                  onChange={(e) => setNouvelEvenement(e.target.value)}
+                  placeholder="Nom du nouvel événement"
+                  className="border rounded px-2 py-1 text-sm"
+                />
+                <button
+                  onClick={creerEvenement}
+                  className="bg-primary text-white text-sm px-3 py-1 rounded"
+                >
+                  Créer
+                </button>
               </div>
-            )}
-          </div>
 
-          {/* Grille SVG */}
-          {carte && (
-            <div className="border border-secondary-light rounded overflow-auto" style={{ maxHeight: '70vh' }}>
-              <DndContext sensors={sensors} onDragEnd={(e) => gererFinDrag(e, TAILLE_CASE * zoom)}>
-                <div style={{ position: 'relative', width: largeurPx, height: hauteurPx }}>
-                    <svg width={largeurPx} height={hauteurPx} style={{ position: 'absolute', top: 0, left: 0 }}>
-                    <GrilleSVG
-                        largeurCases={carte.largeur_map}
-                        longueurCases={carte.longueur_map}
-                        tailleCase={TAILLE_CASE * zoom}
-                    />
-                    </svg>
+              {evenementId && (
+                <>
+                  {/* Sélection de carte */}
+                  <div className="flex flex-wrap gap-2 items-center mb-4">
+                    <select
+                      value={carteId || ''}
+                      onChange={(e) => setCarteId(e.target.value || null)}
+                      className="border rounded px-2 py-1 text-sm"
+                    >
+                      <option value="">— Choisir une carte —</option>
+                      {cartes.map((c) => (
+                        <option key={c.id} value={c.id}>{c.nom}</option>
+                      ))}
+                    </select>
 
-                    {tables.map((table) => (
-                    <TableDraggable
-                        key={table.id}
-                        table={table}
-                        tailleCasePx={TAILLE_CASE * zoom}
-                        selectionnee={tableSelectionneeId === table.id}
-                        onSelect={setTableSelectionneeId}
-                        couleur={couleurStatut[table.statut] || couleurStatut.vide}
+                    <input
+                      type="text"
+                      value={nomCarteInput}
+                      onChange={(e) => setNomCarteInput(e.target.value)}
+                      placeholder="Nom (ex: Jour 1)"
+                      className="border rounded px-2 py-1 text-sm w-32"
                     />
-                    ))}
-                </div>
-                </DndContext>
+                    <input
+                      type="number"
+                      min="1"
+                      value={largeurInput}
+                      onChange={(e) => setLargeurInput(e.target.value)}
+                      className="border rounded px-2 py-1 w-20 text-sm"
+                      title="Largeur (cases)"
+                    />
+                    <input
+                      type="number"
+                      min="1"
+                      value={longueurInput}
+                      onChange={(e) => setLongueurInput(e.target.value)}
+                      className="border rounded px-2 py-1 w-20 text-sm"
+                      title="Longueur (cases)"
+                    />
+                    <button
+                      onClick={creerCarte}
+                      className="bg-primary text-white text-sm px-3 py-1 rounded"
+                    >
+                      Nouvelle carte
+                    </button>
+
+                    {carte && (
+                      <button
+                        onClick={majTailleCarte}
+                        className="border text-sm px-3 py-1 rounded"
+                      >
+                        Redimensionner "{carte.nom}"
+                      </button>
+                    )}
+
+                    {carte && (
+                        <div className="flex flex-wrap gap-2 items-center mb-4">
+                            <label className="text-sm">
+                            Table — largeur
+                            <input
+                                type="number"
+                                min="1"
+                                value={largeurTableInput}
+                                onChange={(e) => setLargeurTableInput(e.target.value)}
+                                className="border rounded px-2 py-1 ml-2 w-16 text-sm"
+                            />
+                            </label>
+                            <label className="text-sm">
+                            longueur
+                            <input
+                                type="number"
+                                min="1"
+                                value={longueurTableInput}
+                                onChange={(e) => setLongueurTableInput(e.target.value)}
+                                className="border rounded px-2 py-1 ml-2 w-16 text-sm"
+                            />
+                            </label>
+                            <button
+                            onClick={ajouterTable}
+                            className="bg-primary text-white text-sm px-3 py-1 rounded"
+                            >
+                            Ajouter une table
+                            </button>
+
+                            {tableSelectionneeId && (
+                            <button
+                                onClick={() => supprimerTable(tableSelectionneeId)}
+                                className="border border-red-400 text-red-600 text-sm px-3 py-1 rounded"
+                            >
+                                Supprimer la table sélectionnée
+                            </button>
+                            )}
+                        </div>
+                        )}
+
+                    {carte && (
+                      <div className="flex items-center gap-2 ml-auto">
+                        <button onClick={() => setZoom((z) => Math.max(0.25, z - 0.25))} className="border rounded px-2 text-sm">-</button>
+                        <span className="text-sm">{Math.round(zoom * 100)}%</span>
+                        <button onClick={() => setZoom((z) => Math.min(3, z + 0.25))} className="border rounded px-2 text-sm">+</button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Grille SVG */}
+                  {carte && (
+                    <div className="border border-secondary-light rounded overflow-auto" style={{ maxHeight: '70vh' }}>
+                      <DndContext sensors={sensors} onDragEnd={(e) => gererFinDrag(e, TAILLE_CASE * zoom)}>
+                        <div style={{ position: 'relative', width: largeurPx, height: hauteurPx }}>
+                            <svg width={largeurPx} height={hauteurPx} style={{ position: 'absolute', top: 0, left: 0 }}>
+                            <GrilleSVG
+                                largeurCases={carte.largeur_map}
+                                longueurCases={carte.longueur_map}
+                                tailleCase={TAILLE_CASE * zoom}
+                            />
+                            </svg>
+
+                            {tables.map((table) => (
+                            <TableDraggable
+                                key={table.id}
+                                table={table}
+                                tailleCasePx={TAILLE_CASE * zoom}
+                                selectionnee={tableSelectionneeId === table.id}
+                                onSelect={(id) => { setTableSelectionneeId(id); setPanneauOuvert(true) }}
+                                couleur={couleurStatut[table.statut] || couleurStatut.vide}
+                            />
+                            ))}
+                        </div>
+                        </DndContext>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+         {panneauOuvert && tableSelectionnee && (
+            <div
+              ref={refPanneau}
+              className="w-64 shrink-0 border border-secondary-light rounded bg-surface p-4 h-fit sticky top-4"
+            >
+              <div className="flex justify-between items-center mb-3">
+                <h2 className="font-display font-bold text-sm">Table</h2>
+                <button
+                  onClick={fermerPanneau}
+                  className="text-sm text-nav-text opacity-60 hover:opacity-100"
+                >
+                  ✕ Fermer
+                </button>
+              </div>
+
+              <div className="text-sm space-y-1 mb-4">
+                <p><strong>Dimensions :</strong> {tableSelectionnee.largeur} × {tableSelectionnee.longueur}</p>
+                <p><strong>Position :</strong> x={tableSelectionnee.x}, y={tableSelectionnee.y}</p>
+                <p><strong>Statut :</strong> {tableSelectionnee.statut}</p>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <button className="border rounded px-3 py-1 text-sm opacity-40 cursor-not-allowed" disabled>
+                  Rotation (à venir)
+                </button>
+                <button className="border rounded px-3 py-1 text-sm opacity-40 cursor-not-allowed" disabled>
+                  Affecter un participant (à venir)
+                </button>
+                <button
+                  onClick={() => { supprimerTable(tableSelectionnee.id); fermerPanneau() }}
+                  className="border border-red-400 text-red-600 rounded px-3 py-1 text-sm"
+                >
+                  Supprimer la table
+                </button>
+              </div>
             </div>
           )}
-        </>
-      )}
-    </div>
-  )
+        </div>
+      )
+    
 }
 
 function GrilleSVG({ largeurCases, longueurCases, tailleCase }) {
