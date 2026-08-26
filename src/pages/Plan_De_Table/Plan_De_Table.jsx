@@ -1,0 +1,1 @@
+export default function Plan_de_Table(){}

@@ -13,6 +13,9 @@ import ReinitialiserMdp from './pages/ReinitialiserMdp'
 import Tournois from './pages/Tournois'
 import InterClub from './pages/InterClub'
 import Installation from './pages/Installation'
+import Plan_De_Table from './pages/Plan_De_Table/Plan_De_Table'
+import AdminRoute from './components/AdminRoute'
+
 
 
 function RouteProtegee({ children }) {
@@ -52,6 +55,7 @@ export default function App() {
         <Route path="/tournois" element={<Tournois />} />
         <Route path="/inter-club" element={<InterClub />} />
         <Route path="/installation" element={<Installation />} />
+        <Route path="/Plan_De_Table/Plan_De_Table" element={<AdminRoute><Plan_De_Table /></AdminRoute>} />
       </Routes>
     </BrowserRouter>
   )
