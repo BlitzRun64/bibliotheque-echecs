@@ -56,16 +56,7 @@ export default function Plan_de_Table() {
   else setTables([])
 }, [carte])
 
-useEffect(() => {
-  function gererClicExterieur(e) {
-    if (refPanneau.current && !refPanneau.current.contains(e.target)) {
-      setPanneauOuvert(false)
-      setTableSelectionneeId(null)
-    }
-  }
-  document.addEventListener('mousedown', gererClicExterieur)
-  return () => document.removeEventListener('mousedown', gererClicExterieur)
-}, [])
+
 
 
 
@@ -174,10 +165,7 @@ useEffect(() => {
         deplacerTable(table.id, nouveauX, nouveauY)
     }
 
-    function fermerPanneau() {
-      setPanneauOuvert(false)
-      setTableSelectionneeId(null)
-    }
+    
 
   async function chargerCartes() {
     setErreur(null)
@@ -237,6 +225,16 @@ useEffect(() => {
       setLongueurInput(carte.longueur_map)
     }
   }, [carte])
+
+  useEffect(() => {
+  function gererClicExterieur(e) {
+    if (!e.target.closest('.popover-table') && !e.target.closest('.table-draggable')) {
+      setTableSelectionneeId(null)
+    }
+  }
+  document.addEventListener('mousedown', gererClicExterieur)
+  return () => document.removeEventListener('mousedown', gererClicExterieur)
+}, [])
 
 const largeurPx = carte ? carte.largeur_map * TAILLE_CASE * zoom : 0
 const hauteurPx = carte ? carte.longueur_map * TAILLE_CASE * zoom : 0
@@ -366,14 +364,7 @@ const tableSelectionnee = tables.find((t) => t.id === tableSelectionneeId) || nu
                             Ajouter une table
                             </button>
 
-                            {tableSelectionneeId && (
-                            <button
-                                onClick={() => supprimerTable(tableSelectionneeId)}
-                                className="border border-red-400 text-red-600 text-sm px-3 py-1 rounded"
-                            >
-                                Supprimer la table sélectionnée
-                            </button>
-                            )}
+                           
                         </div>
                         )}
 
@@ -405,7 +396,8 @@ const tableSelectionnee = tables.find((t) => t.id === tableSelectionneeId) || nu
                                 table={table}
                                 tailleCasePx={TAILLE_CASE * zoom}
                                 selectionnee={tableSelectionneeId === table.id}
-                                onSelect={(id) => { setTableSelectionneeId(id); setPanneauOuvert(true) }}
+                                onSelect={(id) => { setTableSelectionneeId(id)}}
+                                onSupprimer={supprimerTable}
                                 couleur={couleurStatut[table.statut] || couleurStatut.vide}
                             />
                             ))}
@@ -492,7 +484,7 @@ function GrilleSVG({ largeurCases, longueurCases, tailleCase }) {
   return <>{lignes}</>
 }
 
-function TableDraggable({ table, tailleCasePx, selectionnee, onSelect, couleur }) {
+function TableDraggable({ table, tailleCasePx, selectionnee, onSelect, couleur, onSupprimer }) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: table.id
   })
@@ -507,7 +499,7 @@ function TableDraggable({ table, tailleCasePx, selectionnee, onSelect, couleur }
     border: selectionnee ? '3px solid #000' : '1px solid #374151',
     boxSizing: 'border-box',
     cursor: 'grab',
-    touchAction: 'none', // essentiel pour le tactile : empêche le scroll pendant le drag
+    touchAction: 'none',
     transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
     display: 'flex',
     alignItems: 'center',
@@ -523,11 +515,64 @@ function TableDraggable({ table, tailleCasePx, selectionnee, onSelect, couleur }
     <div
       ref={setNodeRef}
       style={style}
+      className="table-draggable"
       onClick={() => onSelect(table.id)}
       {...listeners}
       {...attributes}
     >
       {table.largeur}×{table.longueur}
+
+      {selectionnee && (
+        <div
+          className="popover-table"
+          style={{
+            position: 'absolute',
+            top: '100%',
+            left: 0,
+            marginTop: '4px',
+            width: '180px',
+            background: 'white',
+            border: '1px solid #d1d5db',
+            borderRadius: '6px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            padding: '10px',
+            zIndex: 20,
+            cursor: 'default'
+          }}
+          onClick={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-xs font-semibold">Table</span>
+            <button
+              onClick={() => onSelect(null)}
+              className="text-xs opacity-60 hover:opacity-100"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="text-xs space-y-1 mb-3">
+            <p>{table.largeur} × {table.longueur}</p>
+            <p>Statut : {table.statut}</p>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <button className="border rounded px-2 py-1 text-xs opacity-40 cursor-not-allowed" disabled>
+              Rotation (à venir)
+            </button>
+            <button className="border rounded px-2 py-1 text-xs opacity-40 cursor-not-allowed" disabled>
+              Affecter (à venir)
+            </button>
+            <button
+              onClick={() => { onSupprimer(table.id); onSelect(null) }}
+              className="border border-red-400 text-red-600 rounded px-2 py-1 text-xs"
+            >
+              Supprimer
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
