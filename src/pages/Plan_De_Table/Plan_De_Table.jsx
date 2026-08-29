@@ -1,7 +1,7 @@
 import { useEffect, useState , useRef} from 'react'
 import { supabase } from '../../supabaseClient'
 import { DndContext, useDraggable, useDroppable, useSensor, useSensors, PointerSensor } from '@dnd-kit/core'
-
+import html2canvas from 'html2canvas'
 const TAILLE_CASE = 24 // pixels par unité de grille
 
   function dimensionsEffectives(table) {
@@ -22,6 +22,9 @@ export default function Plan_de_Table() {
   const [modeleLargeurInput, setModeleLargeurInput] = useState(4)
   const [modeleLongueurInput, setModeleLongueurInput] = useState(2)
   const [modeleQuantiteInput, setModeleQuantiteInput] = useState(5)
+
+  const refPlan = useRef(null)
+  const [exportEnCours, setExportEnCours] = useState(false)
 
   const [menuParticipantsOuvert, setMenuParticipantsOuvert] = useState(false)
   const [participantEnEdition, setParticipantEnEdition] = useState(null)
@@ -199,7 +202,31 @@ useEffect(() => {
         }
 
     
+        async function exporterImage() {
+            if (!refPlan.current || !carte) return
+            setExportEnCours(true)
+            setErreur(null)
 
+            try {
+              // Ferme toute popover ouverte avant la capture pour ne pas la voir sur l'image
+              setTableSelectionneeId(null)
+              await new Promise((resolve) => setTimeout(resolve, 50)) // laisse React re-render sans la popover
+
+              const canvas = await html2canvas(refPlan.current, {
+                backgroundColor: '#ffffff',
+                scale: 2 // meilleure résolution
+              })
+
+              const lien = document.createElement('a')
+              lien.download = `plan-${carte.nom.replace(/\s+/g, '-')}.png`
+              lien.href = canvas.toDataURL('image/png')
+              lien.click()
+            } catch (e) {
+              setErreur("Erreur lors de l'export : " + e.message)
+            } finally {
+              setExportEnCours(false)
+            }
+          }
 
    function ouvrirEdition(participant) {
     setParticipantEnEdition(participant.id)
@@ -392,6 +419,83 @@ async function creerModele() {
   if (error) { setErreur(error.message); return }
   setModeles((prev) => [...prev, data])
 }
+
+async function dupliquerCarte(carteSource, nouveauNom) {
+  if (!nouveauNom.trim()) return
+  setErreur(null)
+
+  const { data: nouvelleCarte, error: erreurCarte } = await supabase
+    .from('pt_map')
+    .insert({
+      evenement_id: carteSource.evenement_id,
+      nom: nouveauNom.trim(),
+      largeur_map: carteSource.largeur_map,
+      longueur_map: carteSource.longueur_map,
+      configuration: carteSource.configuration
+    })
+    .select()
+    .single()
+  if (erreurCarte) { setErreur(erreurCarte.message); return }
+
+  const { data: modelesSource } = await supabase
+    .from('pt_modele_table').select('*').eq('map_id', carteSource.id)
+  const { data: tablesSource } = await supabase
+    .from('pt_table').select('*').eq('map_id', carteSource.id)
+
+  const idsTablesSource = (tablesSource || []).map((t) => t.id)
+  const { data: placementsSource } = idsTablesSource.length > 0
+    ? await supabase.from('pt_placement').select('*').in('table_id', idsTablesSource)
+    : { data: [] }
+
+  const mappingModeles = {}
+  for (const m of modelesSource || []) {
+    const { data: nouveauModele, error } = await supabase
+      .from('pt_modele_table')
+      .insert({
+        map_id: nouvelleCarte.id,
+        largeur: m.largeur,
+        longueur: m.longueur,
+        quantite_disponible: m.quantite_disponible
+      })
+      .select()
+      .single()
+    if (error) { setErreur(error.message); return }
+    mappingModeles[m.id] = nouveauModele.id
+  }
+
+  const mappingTables = {}
+  for (const t of tablesSource || []) {
+    const { data: nouvelleTable, error } = await supabase
+      .from('pt_table')
+      .insert({
+        map_id: nouvelleCarte.id,
+        modele_id: t.modele_id ? (mappingModeles[t.modele_id] || null) : null,
+        largeur: t.largeur,
+        longueur: t.longueur,
+        x: t.x,
+        y: t.y,
+        rotation: t.rotation,
+        statut: t.statut
+      })
+      .select()
+      .single()
+    if (error) { setErreur(error.message); return }
+    mappingTables[t.id] = nouvelleTable.id
+  }
+
+  for (const p of placementsSource || []) {
+    const nouveauTableId = mappingTables[p.table_id]
+    if (!nouveauTableId) continue
+    const { error } = await supabase
+      .from('pt_placement')
+      .insert({ table_id: nouveauTableId, participant_id: p.participant_id })
+    if (error) { setErreur(error.message); return }
+  }
+
+  await chargerCartes()
+  setCarteId(nouvelleCarte.id)
+}
+
 
 async function poserTableDepuisModele(modele) {
   if (modele.quantite_disponible <= 0) return
@@ -596,6 +700,7 @@ const tableSelectionnee = tables.find((t) => t.id === tableSelectionneeId) || nu
                     >
                       Nouvelle carte
                     </button>
+                     
 
                     {carte && (
                       <button
@@ -606,9 +711,31 @@ const tableSelectionnee = tables.find((t) => t.id === tableSelectionneeId) || nu
                       </button>
                     )}
 
+                     <div className="w-full" />
+                      <h1 className="text-lg font-display font-bold w-full"> Duplique la carte </h1>
+                    <button
+                      onClick={() => carte && dupliquerCarte(carte, nomCarteInput)}
+                      disabled={!carte}
+                      className="border text-sm px-3 py-1 rounded disabled:opacity-40"
+                    >
+                      Dupliquer "{carte?.nom || '...'}"
+                    </button>
+
                     
                       <div className="w-full" />
+                      <h1 className='text-lg font-display font-bold w-full'>Photo plan</h1>
+
+                    <button
+                        onClick={exporterImage}
+                        disabled={!carte || exportEnCours}
+                        className="border text-sm px-3 py-1 rounded disabled:opacity-40"
+                      >
+                        {exportEnCours ? 'Export...' : '📷 Exporter en image'}
+                      </button>
+                      <div className="w-full" />
                       <h1 className="text-lg font-display font-bold w-full"> Menu table </h1>
+                      
+
 
                     {carte && (
                         <div className="flex flex-wrap gap-2 items-center mb-4">
@@ -789,7 +916,7 @@ const tableSelectionnee = tables.find((t) => t.id === tableSelectionneeId) || nu
                             </div>
 
                             <div className="border border-secondary-light rounded overflow-auto flex-1" style={{ maxHeight: '70vh' }}>
-                              <div style={{ position: 'relative', width: largeurPx, height: hauteurPx }}>
+                              <div ref={refPlan} style={{ position: 'relative', width: largeurPx, height: hauteurPx }}>
                                 <svg width={largeurPx} height={hauteurPx} style={{ position: 'absolute', top: 0, left: 0 }}>
                                   <GrilleSVG
                                     largeurCases={carte.largeur_map}
@@ -1054,9 +1181,9 @@ function TableDraggable({
       ) : (
         placementsTable.map((p) => (
           <div key={p.id} style={{ lineHeight: 1.2 }}>
-            {p.pt_participant.prenom} {p.pt_participant.nom}
+            
             {p.pt_participant.profession && (
-              <div style={{ fontSize: '9px', opacity: 0.8 }}>{p.pt_participant.profession}</div>
+              <div style={{ fontSize: '12px', opacity: 0.8 }}>{p.pt_participant.profession}</div>
             )}
           </div>
         ))
