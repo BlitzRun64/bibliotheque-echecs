@@ -1,6 +1,6 @@
 import { useEffect, useState , useRef} from 'react'
 import { supabase } from '../../supabaseClient'
-import { DndContext, useDraggable , useSensor , useSensors, PointerSensor} from '@dnd-kit/core'
+import { DndContext, useDraggable, useDroppable, useSensor, useSensors, PointerSensor } from '@dnd-kit/core'
 
 const TAILLE_CASE = 24 // pixels par unité de grille
 
@@ -16,6 +16,14 @@ export default function Plan_de_Table() {
   const [evenements, setEvenements] = useState([])
   const [evenementId, setEvenementId] = useState(null)
   const [nouvelEvenement, setNouvelEvenement] = useState('')
+
+  const [menuParticipantsOuvert, setMenuParticipantsOuvert] = useState(false)
+  const [participantEnEdition, setParticipantEnEdition] = useState(null)
+  const [editPrenom, setEditPrenom] = useState('')
+  const [editNom, setEditNom] = useState('')
+  const [editProfession, setEditProfession] = useState('')
+
+  const [sidebarOuvert, setSidebarOuvert] = useState(true)
 
 
   const [participants, setParticipants] = useState([])
@@ -188,6 +196,45 @@ useEffect(() => {
         if (tableSelectionneeId === id) setTableSelectionneeId(null)
         }
 
+
+   function ouvrirEdition(participant) {
+    setParticipantEnEdition(participant.id)
+    setEditPrenom(participant.prenom)
+    setEditNom(participant.nom)
+    setEditProfession(participant.profession || '')
+    }
+
+  function annulerEdition() {
+    setParticipantEnEdition(null)
+  }
+
+  async function sauvegarderParticipant(id) {
+    if (!editPrenom.trim() || !editNom.trim()) return
+    setErreur(null)
+    const { data, error } = await supabase
+      .from('pt_participant')
+      .update({
+        prenom: editPrenom.trim(),
+        nom: editNom.trim(),
+        profession: editProfession.trim() || null
+      })
+      .eq('id', id)
+      .select()
+      .single()
+    if (error) { setErreur(error.message); return }
+    setParticipants((prev) =>
+      prev.map((p) => (p.id === id ? data : p)).sort((a, b) => a.nom.localeCompare(b.nom))
+    )
+    setParticipantEnEdition(null)
+  }
+
+  async function supprimerParticipant(id) {
+    setErreur(null)
+    const { error } = await supabase.from('pt_participant').delete().eq('id', id)
+    if (error) { setErreur(error.message); return }
+    setParticipants((prev) => prev.filter((p) => p.id !== id))
+    setPlacements((prev) => prev.filter((pl) => pl.participant_id !== id))
+  }     
    function couleurTable(table, nbParticipants) {
       if (table.statut === 'reflexion') return '#f97316' // orange
       if (table.statut === 'warning') return '#eab308'    // jaune
@@ -232,7 +279,19 @@ useEffect(() => {
         }
 
     function gererFinDrag(event, tailleCasePx) {
-        const { active, delta } = event
+        const { active,over, delta } = event
+        const type = active.data.current?.type
+
+         if (type === 'persona') {
+          if (!over) return
+          const tableId = over.data.current?.tableId
+          if (!tableId) return
+          assignerParticipant(tableId, active.data.current.participantId)
+          return
+        }
+
+
+
         const table = tables.find((t) => t.id === active.id)
         if (!table) return
 
@@ -513,6 +572,12 @@ const tableSelectionnee = tables.find((t) => t.id === tableSelectionneeId) || nu
                       >
                         Ajouter un participant
                       </button>
+                      <button
+                        onClick={() => setMenuParticipantsOuvert(true)}
+                        className="border text-sm px-3 py-1 rounded"
+                      >
+                        Gérer les participants
+                      </button>
                       <span className="text-xs text-nav-text opacity-60">
                         {participants.length} participant{participants.length > 1 ? 's' : ''}
                       </span>
@@ -522,42 +587,155 @@ const tableSelectionnee = tables.find((t) => t.id === tableSelectionneeId) || nu
                   {/* Grille SVG */}
                   {carte && (
                     <div className="border border-secondary-light rounded overflow-auto" style={{ maxHeight: '70vh' }}>
-                      <DndContext sensors={sensors} onDragEnd={(e) => gererFinDrag(e, TAILLE_CASE * zoom)}>
-                        <div style={{ position: 'relative', width: largeurPx, height: hauteurPx }}>
-                            <svg width={largeurPx} height={hauteurPx} style={{ position: 'absolute', top: 0, left: 0 }}>
-                            <GrilleSVG
-                                largeurCases={carte.largeur_map}
-                                longueurCases={carte.longueur_map}
-                                tailleCase={TAILLE_CASE * zoom}
-                            />
-                            </svg>
+                       <DndContext sensors={sensors} onDragEnd={(e) => gererFinDrag(e, TAILLE_CASE * zoom)}>
+                          <div className="flex gap-3">
+                            <div className={`shrink-0 border border-secondary-light rounded p-2 transition-all overflow-visible ${sidebarOuvert ? 'w-48' : 'w-8'}`}>
+                              <button
+                                onClick={() => setSidebarOuvert((v) => !v)}
+                                className="text-xs mb-2 w-full text-left"
+                              >
+                                {sidebarOuvert ? '◀ Participants' : '▶'}
+                              </button>
+                              {sidebarOuvert && (
+                                <div className="flex flex-col gap-1 overflow-y-auto" style={{ maxHeight: '65vh' }}>
+                                  {participants.map((p) => (
+                                    <PersonaDraggable key={p.id} participant={p} />
+                                  ))}
+                                </div>
+                              )}
+                            </div>
 
-                            {tables.map((table) => {
-                               const placementsTable = placements.filter((p) => p.table_id === table.id)
-                               return (
-                            <TableDraggable
-                                key={table.id}
-                                table={table}
-                                tailleCasePx={TAILLE_CASE * zoom}
-                                selectionnee={tableSelectionneeId === table.id}
-                                onSelect={(id) => { setTableSelectionneeId(id)}}
-                                onSupprimer={supprimerTable}
-                                onPivoter={pivoterTable}
-                                couleur={couleurTable[table.statut] || couleurTable.vide}
-                                placementsTable={placementsTable}
-                                participants={participants}
-                                onAssigner={assignerParticipant}
-                                onRetirer={retirerPlacement}
-                            />
-                            )}
-                          
-                          )}
-                        </div>
+                            <div className="border border-secondary-light rounded overflow-auto flex-1" style={{ maxHeight: '70vh' }}>
+                              <div style={{ position: 'relative', width: largeurPx, height: hauteurPx }}>
+                                <svg width={largeurPx} height={hauteurPx} style={{ position: 'absolute', top: 0, left: 0 }}>
+                                  <GrilleSVG
+                                    largeurCases={carte.largeur_map}
+                                    longueurCases={carte.longueur_map}
+                                    tailleCase={TAILLE_CASE * zoom}
+                                  />
+                                </svg>
+
+                                {tables.map((table) => {
+                                  const placementsTable = placements.filter((p) => p.table_id === table.id)
+                                  return (
+                                    <TableDraggable
+                                      key={table.id}
+                                      table={table}
+                                      tailleCasePx={TAILLE_CASE * zoom}
+                                      selectionnee={tableSelectionneeId === table.id}
+                                      onSelect={setTableSelectionneeId}
+                                      onSupprimer={supprimerTable}
+                                      onPivoter={pivoterTable}
+                                      couleur={couleurTable(table, placementsTable.length)}
+                                      placementsTable={placementsTable}
+                                      participants={participants}
+                                      onAssigner={assignerParticipant}
+                                      onRetirer={retirerPlacement}
+                                    />
+                                  )
+                                })}
+                              </div>
+                            </div>
+                          </div>
                         </DndContext>
                     </div>
                   )}
                 </>
               )}
+              {menuParticipantsOuvert && (
+                  <div
+                    className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+                    onClick={() => setMenuParticipantsOuvert(false)}
+                  >
+                    <div
+                      className="bg-white rounded shadow-lg w-full max-w-lg max-h-[80vh] overflow-y-auto p-4"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className="flex justify-between items-center mb-4">
+                        <h2 className="font-display font-bold text-base">Participants ({participants.length})</h2>
+                        <button
+                          onClick={() => setMenuParticipantsOuvert(false)}
+                          className="text-sm opacity-60 hover:opacity-100"
+                        >
+                          ✕ Fermer
+                        </button>
+                      </div>
+
+                      {participants.length === 0 && (
+                        <p className="text-sm text-nav-text opacity-60">Aucun participant pour cet événement.</p>
+                      )}
+
+                      <div className="flex flex-col gap-2">
+                        {participants.map((p) => (
+                          <div key={p.id} className="border rounded p-2">
+                            {participantEnEdition === p.id ? (
+                              <div className="flex flex-col gap-2">
+                                <div className="flex gap-2">
+                                  <input
+                                    type="text"
+                                    value={editPrenom}
+                                    onChange={(e) => setEditPrenom(e.target.value)}
+                                    placeholder="Prénom"
+                                    className="border rounded px-2 py-1 text-sm flex-1"
+                                  />
+                                  <input
+                                    type="text"
+                                    value={editNom}
+                                    onChange={(e) => setEditNom(e.target.value)}
+                                    placeholder="Nom"
+                                    className="border rounded px-2 py-1 text-sm flex-1"
+                                  />
+                                </div>
+                                <input
+                                  type="text"
+                                  value={editProfession}
+                                  onChange={(e) => setEditProfession(e.target.value)}
+                                  placeholder="Profession"
+                                  className="border rounded px-2 py-1 text-sm"
+                                />
+                                <div className="flex gap-2 justify-end">
+                                  <button
+                                    onClick={annulerEdition}
+                                    className="text-xs px-3 py-1 rounded border"
+                                  >
+                                    Annuler
+                                  </button>
+                                  <button
+                                    onClick={() => sauvegarderParticipant(p.id)}
+                                    className="text-xs px-3 py-1 rounded bg-primary text-white"
+                                  >
+                                    Enregistrer
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="flex justify-between items-center">
+                                <div className="text-sm">
+                                  <span className="font-medium">{p.prenom} {p.nom}</span>
+                                  {p.profession && <span className="opacity-60"> — {p.profession}</span>}
+                                </div>
+                                <div className="flex gap-2">
+                                  <button
+                                    onClick={() => ouvrirEdition(p)}
+                                    className="text-xs px-2 py-1 rounded border hover:bg-gray-50"
+                                  >
+                                    Modifier
+                                  </button>
+                                  <button
+                                    onClick={() => supprimerParticipant(p.id)}
+                                    className="text-xs px-2 py-1 rounded border border-red-400 text-red-600 hover:bg-red-50"
+                                  >
+                                    Supprimer
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
             </div>
          
         </div>
@@ -599,54 +777,95 @@ function GrilleSVG({ largeurCases, longueurCases, tailleCase }) {
   return <>{lignes}</>
 }
 
-function TableDraggable({
-  table, tailleCasePx, selectionnee, onSelect, couleur, onPivoter, onSupprimer,
-  placementsTable, participants, onAssigner, onRetirer
-}) {
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({ id: table.id })
-  const [recherche, setRecherche] = useState('')
 
-  const dim = dimensionsEffectives(table)
+
+
+function PersonaDraggable({ participant }) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: `persona-${participant.id}`,
+    data: { type: 'persona', participantId: participant.id }
+  })
 
   const style = {
-    position: 'absolute',
-    left: table.x * tailleCasePx,
-    top: table.y * tailleCasePx,
-    width: dim.largeur * tailleCasePx,
-    height: dim.longueur * tailleCasePx,
-    backgroundColor: couleur,
-    border: selectionnee ? '3px solid #000' : '1px solid #374151',
-    boxSizing: 'border-box',
-    cursor: 'grab',
-    touchAction: 'none',
     transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '10px',
-    color: '#111',
-    padding: '2px',
-    textAlign: 'center',
-    userSelect: 'none',
-    overflow: 'visible'
+    opacity: isDragging ? 0.4 : 1,
+    touchAction: 'none',
+    cursor: 'grab'
   }
-
-  const idsDejaAssignes = placementsTable.map((p) => p.participant_id)
-  const participantsDisponibles = participants.filter(
-    (p) => !idsDejaAssignes.includes(p.id) &&
-      `${p.prenom} ${p.nom}`.toLowerCase().includes(recherche.toLowerCase())
-  )
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className="table-draggable"
-      onClick={() => onSelect(table.id)}
       {...listeners}
       {...attributes}
+      className="flex items-center gap-2 border rounded px-2 py-1 text-xs bg-white select-none"
     >
+      <div className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-[10px] font-bold shrink-0">
+        {participant.prenom[0]}{participant.nom[0]}
+      </div>
+      <span className="truncate">{participant.prenom} {participant.nom}</span>
+    </div>
+  )
+}
+
+function TableDraggable({
+      table, tailleCasePx, selectionnee, onSelect, couleur, onPivoter, onSupprimer,
+      placementsTable, participants, onAssigner, onRetirer
+    }) {
+      const { attributes, listeners, setNodeRef: setDragRef, transform } = useDraggable({
+        id: table.id,
+        data: { type: 'table' }
+      })
+      const { setNodeRef: setDropRef, isOver } = useDroppable({
+        id: `drop-${table.id}`,
+        data: { type: 'table-drop', tableId: table.id }
+      })
+      const setRefs = (node) => { setDragRef(node); setDropRef(node) }
+
+      const [recherche, setRecherche] = useState('')
+      const dim = dimensionsEffectives(table)
+
+      const style = {
+        position: 'absolute',
+        left: table.x * tailleCasePx,
+        top: table.y * tailleCasePx,
+        width: dim.largeur * tailleCasePx,
+        height: dim.longueur * tailleCasePx,
+        backgroundColor: couleur,
+        border: isOver ? '3px dashed #2563eb' : (selectionnee ? '3px solid #000' : '1px solid #374151'),
+        boxSizing: 'border-box',
+        cursor: 'grab',
+        touchAction: 'none',
+        transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '10px',
+        color: '#111',
+        padding: '2px',
+        textAlign: 'center',
+        userSelect: 'none',
+        overflow: 'visible'
+      }
+
+      const idsDejaAssignes = placementsTable.map((p) => p.participant_id)
+      const participantsDisponibles = participants.filter(
+        (p) => !idsDejaAssignes.includes(p.id) &&
+          `${p.prenom} ${p.nom}`.toLowerCase().includes(recherche.toLowerCase())
+      )
+
+      return (
+        <div
+          ref={setRefs}
+          style={style}
+          className="table-draggable"
+          onClick={() => onSelect(table.id)}
+          {...listeners}
+          {...attributes}
+        >
+      {/* reste du contenu inchangé : affichage participants + popover */}
       {placementsTable.length === 0 ? (
         <span>{dim.largeur}×{dim.longueur}</span>
       ) : (
@@ -690,7 +909,7 @@ function TableDraggable({
           <div className="text-xs font-semibold mb-1">Participants ({placementsTable.length})</div>
           {placementsTable.map((p) => (
             <div key={p.id} className="flex justify-between items-center text-xs mb-1">
-              <span>{p.pt_participant.prenom} {p.pt_participant.nom}</span>
+              <span>{p.pt_participant.prenom} {p.pt_participant.nom} {p.pt_participant.profession} </span>
               <button onClick={() => onRetirer(p.id)} className="text-red-600 opacity-70 hover:opacity-100">✕</button>
             </div>
           ))}
@@ -703,7 +922,7 @@ function TableDraggable({
             className="border rounded px-2 py-1 text-xs w-full mt-2 mb-1"
           />
           <div style={{ maxHeight: '100px', overflowY: 'auto' }}>
-            {participantsDisponibles.slice(0, 20).map((p) => (
+            {participantsDisponibles.slice(0, 5).map((p) => (
               <button
                 key={p.id}
                 onClick={() => onAssigner(table.id, p.id)}
