@@ -177,6 +177,18 @@ useEffect(() => {
     setPlacements((prev) => prev.filter((p) => p.id !== placementId))
   }
 
+  async function changerStatut(table, nouveauStatut) {
+    setErreur(null)
+    const { data, error } = await supabase
+      .from('pt_table')
+      .update({ statut: nouveauStatut })
+      .eq('id', table.id)
+      .select()
+      .single()
+    if (error) { setErreur(error.message); return }
+    setTables((prev) => prev.map((t) => (t.id === data.id ? data : t)))
+  }
+
     async function ajouterTable() {
         const largeur = parseInt(largeurTableInput, 10)
         const longueur = parseInt(longueurTableInput, 10)
@@ -934,6 +946,7 @@ const tableSelectionnee = tables.find((t) => t.id === tableSelectionneeId) || nu
                                       tailleCasePx={TAILLE_CASE * zoom}
                                       selectionnee={tableSelectionneeId === table.id}
                                       onSelect={setTableSelectionneeId}
+                                      onChangerStatut={changerStatut}
                                       onSupprimer={supprimerTable}
                                       onPivoter={pivoterTable}
                                       couleur={couleurTable(table, placementsTable.length)}
@@ -1121,6 +1134,7 @@ function PersonaDraggable({ participant }) {
 
 function TableDraggable({
       table, tailleCasePx, selectionnee, onSelect, couleur, onPivoter, onSupprimer,
+      onChangerStatut,
       placementsTable, participants, onAssigner, onRetirer
     }) {
       const { attributes, listeners, setNodeRef: setDragRef, transform } = useDraggable({
@@ -1181,7 +1195,7 @@ function TableDraggable({
       ) : (
         placementsTable.map((p) => (
           <div key={p.id} style={{ lineHeight: 1.2 }}>
-            
+            {p.pt_participant.prenom}
             {p.pt_participant.profession && (
               <div style={{ fontSize: '12px', opacity: 0.8 }}>{p.pt_participant.profession}</div>
             )}
@@ -1215,6 +1229,25 @@ function TableDraggable({
           >
             ⟳ Pivoter (90°)
           </button>
+
+          <div className="flex gap-1 mb-2">
+          <button
+            onClick={() => onChangerStatut(table, table.statut === 'reflexion' ? 'vide' : 'reflexion')}
+            className={`flex-1 text-xs rounded px-2 py-1 border ${
+              table.statut === 'reflexion' ? 'bg-orange-500 text-white border-orange-500' : 'hover:bg-gray-50'
+            }`}
+          >
+            🟠 Réflexion
+          </button>
+          <button
+            onClick={() => onChangerStatut(table, table.statut === 'warning' ? 'vide' : 'warning')}
+            className={`flex-1 text-xs rounded px-2 py-1 border ${
+              table.statut === 'warning' ? 'bg-yellow-500 text-white border-yellow-500' : 'hover:bg-gray-50'
+            }`}
+          >
+            🟡 Volonté/zone
+          </button>
+        </div>
 
           <div className="text-xs font-semibold mb-1">Participants ({placementsTable.length})</div>
           {placementsTable.map((p) => (
