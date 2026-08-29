@@ -17,6 +17,12 @@ export default function Plan_de_Table() {
   const [evenementId, setEvenementId] = useState(null)
   const [nouvelEvenement, setNouvelEvenement] = useState('')
 
+  const [modeles, setModeles] = useState([])
+  const [menuModelesOuvert, setMenuModelesOuvert] = useState(false)
+  const [modeleLargeurInput, setModeleLargeurInput] = useState(4)
+  const [modeleLongueurInput, setModeleLongueurInput] = useState(2)
+  const [modeleQuantiteInput, setModeleQuantiteInput] = useState(5)
+
   const [menuParticipantsOuvert, setMenuParticipantsOuvert] = useState(false)
   const [participantEnEdition, setParticipantEnEdition] = useState(null)
   const [editPrenom, setEditPrenom] = useState('')
@@ -89,6 +95,10 @@ useEffect(() => {
   else setPlacements([])
 }, [carte, tables])
 
+useEffect(() => {
+  if (carte) chargerModeles()
+  else setModeles([])
+}, [carte])
 
 
 
@@ -188,13 +198,7 @@ useEffect(() => {
         setTables((prev) => [...prev, data])
         }
 
-    async function supprimerTable(id) {
-        setErreur(null)
-        const { error } = await supabase.from('pt_table').delete().eq('id', id)
-        if (error) { setErreur(error.message); return }
-        setTables((prev) => prev.filter((t) => t.id !== id))
-        if (tableSelectionneeId === id) setTableSelectionneeId(null)
-        }
+    
 
 
    function ouvrirEdition(participant) {
@@ -363,7 +367,90 @@ useEffect(() => {
     setCartes((prev) => prev.map((c) => (c.id === data.id ? data : c)))
   }
 
+async function chargerModeles() {
+  setErreur(null)
+  const { data, error } = await supabase
+    .from('pt_modele_table')
+    .select('*')
+    .eq('map_id', carte.id)
+    .order('largeur')
+  if (error) { setErreur(error.message); return }
+  setModeles(data || [])
+}
 
+async function creerModele() {
+  const largeur = parseInt(modeleLargeurInput, 10)
+  const longueur = parseInt(modeleLongueurInput, 10)
+  const quantite = parseInt(modeleQuantiteInput, 10)
+  if (!carte || !largeur || !longueur || largeur < 1 || longueur < 1 || quantite < 1) return
+  setErreur(null)
+  const { data, error } = await supabase
+    .from('pt_modele_table')
+    .insert({ map_id: carte.id, largeur, longueur, quantite_disponible: quantite })
+    .select()
+    .single()
+  if (error) { setErreur(error.message); return }
+  setModeles((prev) => [...prev, data])
+}
+
+async function poserTableDepuisModele(modele) {
+  if (modele.quantite_disponible <= 0) return
+  setErreur(null)
+
+  const { data: nouvelleTable, error: erreurTable } = await supabase
+    .from('pt_table')
+    .insert({
+      map_id: carte.id,
+      modele_id: modele.id,
+      largeur: modele.largeur,
+      longueur: modele.longueur,
+      x: 0,
+      y: 0,
+      rotation: 0,
+      statut: 'vide'
+    })
+    .select()
+    .single()
+
+  if (erreurTable) { setErreur(erreurTable.message); return }
+
+  const { data: modeleMaj, error: erreurModele } = await supabase
+    .from('pt_modele_table')
+    .update({ quantite_disponible: modele.quantite_disponible - 1 })
+    .eq('id', modele.id)
+    .select()
+    .single()
+
+  if (erreurModele) { setErreur(erreurModele.message); return }
+
+  setTables((prev) => [...prev, nouvelleTable])
+  setModeles((prev) => prev.map((m) => (m.id === modeleMaj.id ? modeleMaj : m)))
+}
+
+async function supprimerTable(id) {
+  setErreur(null)
+  const table = tables.find((t) => t.id === id)
+
+  const { error } = await supabase.from('pt_table').delete().eq('id', id)
+  if (error) { setErreur(error.message); return }
+  setTables((prev) => prev.filter((t) => t.id !== id))
+  if (tableSelectionneeId === id) setTableSelectionneeId(null)
+
+  if (table?.modele_id) {
+    const modele = modeles.find((m) => m.id === table.modele_id)
+    if (modele) {
+      const { data, error: erreurRestock } = await supabase
+        .from('pt_modele_table')
+        .update({ quantite_disponible: modele.quantite_disponible + 1 })
+        .eq('id', modele.id)
+        .select()
+        .single()
+      if (!erreurRestock) {
+        setModeles((prev) => prev.map((m) => (m.id === data.id ? data : m)))
+      }
+    }
+  }
+}
 
 async function pivoterTable(table) {
   setErreur(null)
@@ -411,6 +498,7 @@ const tableSelectionnee = tables.find((t) => t.id === tableSelectionneeId) || nu
 
             <div className="flex-1 min-w-0">
               <h1 className="text-xl font-display font-bold mb-4">Plan de table</h1>
+              <h1 className="text-lg font-display font-bold ">Conferences</h1>
 
               {erreur && (
                 <div className="bg-red-100 text-red-700 text-sm px-3 py-2 rounded mb-4">
@@ -439,6 +527,7 @@ const tableSelectionnee = tables.find((t) => t.id === tableSelectionneeId) || nu
                   placeholder="Nom du nouvel événement"
                   className="border rounded px-2 py-1 text-sm"
                 />
+                <div className='w-full'/>
                 <button
                   onClick={creerEvenement}
                   className="bg-primary text-white text-sm px-3 py-1 rounded"
@@ -449,6 +538,7 @@ const tableSelectionnee = tables.find((t) => t.id === tableSelectionneeId) || nu
 
               {evenementId && (
                 <>
+                  <h1 className="text-lg font-display font-bold "> Versions</h1>
                   {/* Sélection de carte */}
                   <div className="flex flex-wrap gap-2 items-center mb-4">
                     <select
@@ -469,22 +559,37 @@ const tableSelectionnee = tables.find((t) => t.id === tableSelectionneeId) || nu
                       placeholder="Nom (ex: Jour 1)"
                       className="border rounded px-2 py-1 text-sm w-32"
                     />
-                    <input
-                      type="number"
-                      min="1"
-                      value={largeurInput}
-                      onChange={(e) => setLargeurInput(e.target.value)}
-                      className="border rounded px-2 py-1 w-20 text-sm"
-                      title="Largeur (cases)"
-                    />
-                    <input
-                      type="number"
-                      min="1"
-                      value={longueurInput}
-                      onChange={(e) => setLongueurInput(e.target.value)}
-                      className="border rounded px-2 py-1 w-20 text-sm"
-                      title="Longueur (cases)"
-                    />
+                    
+                    
+                      <h1 className="text-lg font-display font-bold w-full"> Dimensions de la salle </h1>
+                    
+                   <div className="flex items-center">
+                      <input
+                        type="number"
+                        value={largeurInput}
+                        onChange={(e) => setLargeurInput(e.target.value)}
+                        className="border rounded-l px-2 py-1 w-20 text-sm"
+                      />
+                      <span className="border border-l-0 rounded-r px-2 py-1 text-sm bg-gray-100">
+                        m
+                      </span>
+                    </div>
+                    <div className="flex items-center">
+                      <input
+                        type="number"
+                        min="1"
+                        value={longueurInput}
+                        onChange={(e) => setLongueurInput(e.target.value)}
+                        className="border rounded-l px-2 py-1 w-20 text-sm"
+                        title="Longueur (cases)"
+                      />
+                      <span className="border border-l-0 rounded-r px-2 py-1 text-sm bg-gray-100">
+                        m
+                      </span>
+                      </div>
+                    
+                      <div className="w-full" />
+                      <h1 className="text-lg font-display font-bold w-full"> Redimensionner la taille de la salle actuel ou créer une nouvelle version </h1>
                     <button
                       onClick={creerCarte}
                       className="bg-primary text-white text-sm px-3 py-1 rounded"
@@ -501,10 +606,14 @@ const tableSelectionnee = tables.find((t) => t.id === tableSelectionneeId) || nu
                       </button>
                     )}
 
+                    
+                      <div className="w-full" />
+                      <h1 className="text-lg font-display font-bold w-full"> Menu table </h1>
+
                     {carte && (
                         <div className="flex flex-wrap gap-2 items-center mb-4">
-                            <label className="text-sm">
-                            Table — largeur
+                            <label className="text-base">
+                            largeur
                             <input
                                 type="number"
                                 min="1"
@@ -513,7 +622,7 @@ const tableSelectionnee = tables.find((t) => t.id === tableSelectionneeId) || nu
                                 className="border rounded px-2 py-1 ml-2 w-16 text-sm"
                             />
                             </label>
-                            <label className="text-sm">
+                            <label className="text-base">
                             longueur
                             <input
                                 type="number"
@@ -523,11 +632,19 @@ const tableSelectionnee = tables.find((t) => t.id === tableSelectionneeId) || nu
                                 className="border rounded px-2 py-1 ml-2 w-16 text-sm"
                             />
                             </label>
+                            <div className="w-full" />
                             <button
                             onClick={ajouterTable}
                             className="bg-primary text-white text-sm px-3 py-1 rounded"
                             >
                             Ajouter une table
+                            </button>
+
+                            <button
+                              onClick={() => setMenuModelesOuvert(true)}
+                              className="border text-sm px-3 py-1 rounded"
+                            >
+                              Modèles de table
                             </button>
 
                            
@@ -564,7 +681,7 @@ const tableSelectionnee = tables.find((t) => t.id === tableSelectionneeId) || nu
                         value={professionInput}
                         onChange={(e) => setProfessionInput(e.target.value)}
                         placeholder="Profession"
-                        className="border rounded px-2 py-1 text-sm w-32"
+                        className="border rounded px-2 py-1 text-sm w-28"
                       />
                       <button
                         onClick={creerParticipant}
@@ -583,6 +700,72 @@ const tableSelectionnee = tables.find((t) => t.id === tableSelectionneeId) || nu
                       </span>
                     </div>
                   )}
+
+                  {menuModelesOuvert && (
+                        <div
+                          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+                          onClick={() => setMenuModelesOuvert(false)}
+                        >
+                          <div
+                            className="bg-white rounded shadow-lg w-full max-w-md max-h-[80vh] overflow-y-auto p-4"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <div className="flex justify-between items-center mb-4">
+                              <h2 className="font-display font-bold text-base">Modèles de table</h2>
+                              <button
+                                onClick={() => setMenuModelesOuvert(false)}
+                                className="text-sm opacity-60 hover:opacity-100"
+                              >
+                                ✕ Fermer
+                              </button>
+                            </div>
+
+                            <div className="flex flex-col gap-2 mb-4">
+                              {modeles.length === 0 && (
+                                <p className="text-sm text-nav-text opacity-60">Aucun modèle pour cette carte.</p>
+                              )}
+                              {modeles.map((m) => (
+                                <div key={m.id} className="flex justify-between items-center border rounded px-3 py-2">
+                                  <span className="text-sm">
+                                    {m.largeur} × {m.longueur} — {m.quantite_disponible} disponible{m.quantite_disponible > 1 ? 's' : ''}
+                                  </span>
+                                  <button
+                                    onClick={() => poserTableDepuisModele(m)}
+                                    disabled={m.quantite_disponible <= 0}
+                                    className="text-xs px-3 py-1 rounded bg-primary text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                                  >
+                                    + Poser sur le plan
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+
+                            <div className="border-t pt-3">
+                              <p className="text-xs font-semibold mb-2">Nouveau modèle</p>
+                              <div className="flex gap-2 items-center flex-wrap">
+                                <input
+                                  type="number" min="1" value={modeleLargeurInput}
+                                  onChange={(e) => setModeleLargeurInput(e.target.value)}
+                                  placeholder="Largeur" className="border rounded px-2 py-1 text-sm w-20"
+                                />
+                                <input
+                                  type="number" min="1" value={modeleLongueurInput}
+                                  onChange={(e) => setModeleLongueurInput(e.target.value)}
+                                  placeholder="Longueur" className="border rounded px-2 py-1 text-sm w-20"
+                                />
+                                <input
+                                  type="number" min="1" value={modeleQuantiteInput}
+                                  onChange={(e) => setModeleQuantiteInput(e.target.value)}
+                                  placeholder="Quantité" className="border rounded px-2 py-1 text-sm w-20"
+                                />
+                                <button onClick={creerModele} className="bg-primary text-white text-sm px-3 py-1 rounded">
+                                  Créer
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
 
                   {/* Grille SVG */}
                   {carte && (
