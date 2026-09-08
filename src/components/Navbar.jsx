@@ -161,6 +161,7 @@ useEffect(() => {
   { label: 'Installer l\'app', to: '/installation' },
   { label: 'Administrer', to: '/admin'},
     ...(profil?.est_admin ? [{ label: 'Plan_De_Table', to: '/Plan_De_Table/Plan_De_Table' }] : [])
+    
 ]
 
   return (
@@ -211,7 +212,7 @@ useEffect(() => {
               title={musiqueActive ? 'Couper la musique' : 'Lancer la musique'}
               disabled={playlist.length === 0}
             >
-              {musiqueActive ? '🔇' : '🎵'}
+              {musiqueActive ? '🎵' : '🔇'}
             </button>
 
 
