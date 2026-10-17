@@ -10,6 +10,7 @@ const DEPARTEMENTS = [
   { id: 'dep3', nom: 'Seine-Maritime', image: '/image/blasons/Seine-Maritime.jpg', lienOfficiel: 'https://www.echecs.asso.fr/ListeTournois.aspx?Action=TOURNOICOMITE&ComiteRef=76' },
   { id: 'dep4', nom: 'Eure', image: '/image/blasons/eure.jpg', lienOfficiel: 'https://www.echecs.asso.fr/ListeTournois.aspx?Action=TOURNOICOMITE&ComiteRef=27' },
   { id: 'dep5', nom: 'Manche', image: '/image/blasons/Manche.jpg', lienOfficiel: 'https://www.echecs.asso.fr/ListeTournois.aspx?Action=TOURNOICOMITE&ComiteRef=50' },
+  { id: 'dep6', nom: 'Mayenne', image: '/image/blasons/Mayenne.jpg', lienOfficiel: 'https://www.echecs.asso.fr/ListeTournois.aspx?Action=TOURNOICOMITE&ComiteRef=53' },
 ]
 
 const x = 600
@@ -63,7 +64,7 @@ function SectionDepartement({ departement, ouvert, onToggle, liens, estAdmin, on
           {estAdmin && (
             <form onSubmit={soumettre} className="flex flex-wrap gap-2">
               <input
-                placeholder="Titre du lien"
+                placeholder="Titre du lien" 
                 value={titre}
                 onChange={(e) => setTitre(e.target.value)}
                 className="border border-secondary-light rounded px-2 py-1 text-sm flex-1"
@@ -188,7 +189,7 @@ function Liens() {
           className = "mx-4 bg-input text-white placeholder-white border border-white rounded px-3 py-2"
           type="url"
           placeholder="https://exemple.com"
-          value={url}
+          value={url}s
           onChange={(e) => setUrl(e.target.value)}
         />
 
