@@ -11,7 +11,8 @@ const DEPARTEMENTS = [
   { id: 'dep4', nom: 'Eure', image: '/image/blasons/eure.jpg', lienOfficiel: 'https://www.echecs.asso.fr/ListeTournois.aspx?Action=TOURNOICOMITE&ComiteRef=27' },
   { id: 'dep5', nom: 'Manche', image: '/image/blasons/Manche.jpg', lienOfficiel: 'https://www.echecs.asso.fr/ListeTournois.aspx?Action=TOURNOICOMITE&ComiteRef=50' },
   { id: 'dep6', nom: 'Mayenne', image: '/image/blasons/Mayenne.jpg', lienOfficiel: 'https://www.echecs.asso.fr/ListeTournois.aspx?Action=TOURNOICOMITE&ComiteRef=53' },
-  {id: 'dep7', nom: 'Finistere', image: '/image/blasons/Finistere.jpg', lienOfficiel: 'https://www.echecs.asso.fr/ListeTournois.aspx?Action=TOURNOICOMITE&ComiteRef=29' },
+  { id: 'dep7', nom: 'Finistere', image: '/image/blasons/Finistere.jpg', lienOfficiel: 'https://www.echecs.asso.fr/ListeTournois.aspx?Action=TOURNOICOMITE&ComiteRef=29' },
+  
 ]
 
 const x = 600
