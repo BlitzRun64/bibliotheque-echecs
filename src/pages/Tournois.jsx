@@ -12,7 +12,7 @@ const DEPARTEMENTS = [
   { id: 'dep5', nom: 'Manche', image: '/image/blasons/Manche.jpg', lienOfficiel: 'https://www.echecs.asso.fr/ListeTournois.aspx?Action=TOURNOICOMITE&ComiteRef=50' },
 ]
 
-const x = 300
+const x = 600
 
 function SectionDepartement({ departement, ouvert, onToggle, liens, estAdmin, onAjoutLien, onSupprimerLien }) {
   const [titre, setTitre] = useState('')
