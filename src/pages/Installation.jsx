@@ -1,14 +1,24 @@
 import { usePwaInstall } from '../usePwaInstall'
+import { useEffect, useState } from 'react'
+import BoutonInstaller from '../components/BoutonInstaller'
+
 
 
 export default function Installation() {
   const { peutInstaller, installe, lancerInstallation } = usePwaInstall()
 
   return (
+    
+
     <div className="max-w-2xl mx-auto p-4">
+
+      <div> 
+       <BoutonInstaller/>
+      </div>
 
       <h1 className="text-2xl font-bold text-black mb-6">
         Installer l'application
+          
       </h1>
 
       {installe && (

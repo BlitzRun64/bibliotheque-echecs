@@ -302,6 +302,7 @@ useEffect(() => {
                   >
                     Vérifier les mises à jour
                   </button>
+                  
 
                   <button onClick={deconnexion} className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50">
                     Déconnexion
