@@ -18,13 +18,22 @@ export default function Bibliotheque() {
   const [utilisateur, setUtilisateur] = useState(null) // null = pas connecté
   const [profil, setProfil] = useState(null)
   const [visible, setVisible] = useState(true)
+  const [imageAgrandie, setImageAgrandie] = useState(null)
 
+ 
   /*<option value="club1">Club 1 (contrasté)</option> */
 
   useEffect(() => {
     chargerLivres()
     chargerUtilisateur()
   }, [])
+
+  useEffect(() => {
+  if (!imageAgrandie) return
+  const onKey = (e) => { if (e.key === 'Escape') setImageAgrandie(null) }
+  window.addEventListener('keydown', onKey)
+  return () => window.removeEventListener('keydown', onKey)
+}, [imageAgrandie])
 
   function lancerMusique(){
    
@@ -77,6 +86,10 @@ export default function Bibliotheque() {
     )
   })
 
+  const total = livres.length
+  const nbFiltres = livresFiltres.length
+
+
   return (
     
     <div className="bg-black min-h-screen">
@@ -109,13 +122,18 @@ export default function Bibliotheque() {
         <h1 className="z-10 relative text-center text-3xl font-bold text-heading  p-4"><mark className  = "StitreB">Bibliothèque du club</mark></h1>
         </div>
 
+        <div className="relative w-full max-w-md mb-6">
         <input
           type="text"
           placeholder="Rechercher par titre, auteur ou thème..."
           value={recherche}
           onChange={(e) => setRecherche(e.target.value)}
-          className="border border-secondary-light rounded px-3 py-2 mb-6 w-full max-w-md bg-surface"
+          className="border border-secondary-light rounded px-3 py-2 pr-20 w-full bg-surface"
         />
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-text-muted pointer-events-none">
+          {nbFiltres}/{total}
+        </span>
+      </div>
 
         {message && (
           <p className="mb-4 text-sm bg-blue-50 text-blue-700 border border-blue-200 rounded p-2">
@@ -129,8 +147,21 @@ export default function Bibliotheque() {
             return (
               <div key={livre.id} className=" border-secondary-light bg-surface rounded-lg p-4 shadow-sm flex gap-4">
                 {livre.couverture_url ? (
-                  <div className="inline-block border-2 border-black">
-                    <img src={livre.couverture_url} alt={livre.titre} className="w-20 h-28  object-cover  rounded flex-shrink-0" />
+                  <div className="relative w-20 h-28 flex-shrink-0 border-2 border-black rounded overflow-hidden">
+                    <img
+                      src={livre.couverture_url}
+                      alt={livre.titre}
+                      loading="lazy"
+                      decoding="async"
+                      className="block w-full h-full object-cover"
+                    />
+                    <button
+                      onClick={() => setImageAgrandie(livre.couverture_url)}
+                      aria-label="Agrandir l'image"
+                      className="absolute bottom-1 right-1 rounded-full bg-black/60 text-white w-6 h-6 text-xs flex items-center justify-center"
+                    >
+                      ⤢
+                    </button>
                   </div>
                 ) : (
                   <div className="w-20 h-28 bg-gray-100 rounded flex-shrink-0 flex items-center justify-center text-gray-400 text-xs text-center">
@@ -181,6 +212,29 @@ export default function Bibliotheque() {
           })}
         </div>
       </div>
+
+
+
+      {imageAgrandie && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+          onClick={() => setImageAgrandie(null)}
+        >
+          <button
+            onClick={() => setImageAgrandie(null)}
+            aria-label="Fermer"
+            className="absolute right-4 top-4 text-3xl text-white"
+          >
+            ✕
+          </button>
+          <img
+            src={imageAgrandie}
+            alt="Couverture agrandie"
+            onClick={(e) => e.stopPropagation()}
+            className="max-h-[90vh] max-w-[90vw] object-contain"
+          />
+        </div>
+      )}
       </div>
     )
   }
