@@ -37,8 +37,11 @@ function SectionDepartement({ departement, ouvert, onToggle, liens, estAdmin, on
         </a>
         <button onClick={onToggle} className="flex-1 flex items-center justify-between text-left">
           <span className=" font-semibold text-text text-white" >{departement.nom}</span>
-          <span className="absolute text-xs, border border-blue bg-black text-white rounded-full px-2 py-1 " style={{right: `${x}px`,}}>
-          {liens.length}
+          <span
+              className="absolute text-xs, border border-blue bg-black text-white rounded-full px-2 py-1  whitespace-nowrap"
+              style={{ left: "30%" }}
+            >
+              {liens.length}
           </span>
 
           <span className={`transition-transform text-text-muted ${ouvert ? 'rotate-90' : ''}`}>▶</span>
