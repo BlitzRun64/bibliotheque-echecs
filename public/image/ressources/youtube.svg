@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Chaînes YouTube">
+  <rect width="256" height="256" rx="40" fill="#c8102e"/>
+  <rect x="40" y="72" width="176" height="112" rx="28" fill="#ffffff"/>
+  <polygon points="108,100 164,128 108,156" fill="#c8102e"/>
+</svg>

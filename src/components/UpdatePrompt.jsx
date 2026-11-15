@@ -1,35 +1,63 @@
 // src/components/UpdatePrompt.jsx
+// Enregistre le service worker et affiche « Nouvelle version disponible — Mettre à jour »
+// quand une nouvelle version attend. Au clic : skipWaiting, puis rechargement de la page
+// dès que le nouveau service worker prend le contrôle (événement « controlling »).
+import { useEffect, useState } from 'react'
 import { useRegisterSW } from 'virtual:pwa-register/react'
+import { planifierVerifications } from '../miseAJourPwa'
+
+const DELAI_RECHARGEMENT_SECOURS = 5000
 
 export default function UpdatePrompt() {
+  const [miseAJourEnCours, setMiseAJourEnCours] = useState(false)
   const {
-    needRefresh: [needRefresh, setNeedRefresh],
+    needRefresh: [nouvelleVersion, setNouvelleVersion],
     updateServiceWorker,
   } = useRegisterSW({
-    onRegisteredSW(swUrl, registration) {
-      // Vérifie s'il y a une nouvelle version toutes les heures
-      if (registration) {
-        setInterval(() => {
-          registration.update()
-        }, 60 * 60 * 1000)
-      }
+    onRegisteredSW(_url, registration) {
+      if (registration) planifierVerifications(registration)
+    },
+    onRegisterError(erreur) {
+      console.error('Service worker : enregistrement impossible', erreur)
     },
   })
 
-  if (!needRefresh) return null
+  // Filet de sécurité : si la page ne s'est pas rechargée d'elle-même, on force le rechargement
+  // pour ne jamais rester bloqué sur l'ancien cache.
+  useEffect(() => {
+    if (!miseAJourEnCours) return
+    const id = setTimeout(() => window.location.reload(), DELAI_RECHARGEMENT_SECOURS)
+    return () => clearTimeout(id)
+  }, [miseAJourEnCours])
+
+  if (!nouvelleVersion) return null
+
+  function mettreAJour() {
+    setMiseAJourEnCours(true)
+    updateServiceWorker(true)
+  }
 
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-gray-900 text-white rounded-lg shadow-lg px-4 py-3 flex items-center gap-3 z-50">
-      <span className="text-sm">Nouvelle version disponible</span>
+    <div
+      role="status"
+      aria-live="polite"
+      className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[calc(100vw-2rem)] sm:w-auto bg-primary text-text-inverse rounded-xl shadow-carte-survol px-4 py-3 flex flex-wrap items-center justify-center gap-3 z-50 border border-nav-text/30"
+    >
+      <span className="text-sm font-semibold">Nouvelle version disponible</span>
       <button
-        onClick={() => updateServiceWorker(true)}
-        className="bg-blue-600 hover:bg-blue-700 text-white text-sm rounded px-3 py-1"
+        type="button"
+        onClick={mettreAJour}
+        disabled={miseAJourEnCours}
+        className="btn btn-secondary btn-sm"
       >
-        Actualiser
+        {miseAJourEnCours ? 'Mise à jour…' : 'Mettre à jour'}
       </button>
       <button
-        onClick={() => setNeedRefresh(false)}
-        className="text-gray-400 text-sm"
+        type="button"
+        onClick={() => setNouvelleVersion(false)}
+        className="btn btn-ghost btn-sm btn-icone"
+        aria-label="Plus tard"
+        title="Plus tard"
       >
         ✕
       </button>

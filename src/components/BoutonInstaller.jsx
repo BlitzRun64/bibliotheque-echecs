@@ -1,46 +1,22 @@
-import { useEffect, useState } from 'react'
-export default function BoutonInstaller() {
-  const [evenementInstall, setEvenementInstall] = useState(null)
-  const [installee, setInstallee] = useState(false)
+// Bouton « Installer l'application » :
+//  - invite native (Android, Chrome, Edge) quand le navigateur la propose ;
+//  - lien vers le guide illustré de la page Installation sur iPhone / iPad ;
+//  - rien du tout si l'application est déjà installée (mode standalone).
+import { Link } from 'react-router-dom'
+import { usePwaInstall } from '../usePwaInstall'
 
-  const estIOS = /iphone|ipad|ipod/i.test(navigator.userAgent)
+export default function BoutonInstaller({ taille, className = '' }) {
+  const { installe, peutInstaller, lancerInstallation, estIOS } = usePwaInstall()
 
-  useEffect(() => {
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-      setInstallee(true)
-    }
+  if (installe) return null
 
-    const onPrompt = (e) => {
-      e.preventDefault()
-      setEvenementInstall(e)
-    }
-    const onInstalled = () => {
-      setInstallee(true)
-      setEvenementInstall(null)
-    }
+  const classes = ['btn', 'btn-primary', taille ? `btn-${taille}` : '', className]
+    .filter(Boolean)
+    .join(' ')
 
-    window.addEventListener('beforeinstallprompt', onPrompt)
-    window.addEventListener('appinstalled', onInstalled)
-    return () => {
-      window.removeEventListener('beforeinstallprompt', onPrompt)
-      window.removeEventListener('appinstalled', onInstalled)
-    }
-  }, [])
-
-  async function installer() {
-    evenementInstall.prompt()
-    await evenementInstall.userChoice
-    setEvenementInstall(null)
-  }
-
-  if (installee) return null
-
-  if (evenementInstall) {
+  if (peutInstaller) {
     return (
-      <button
-        onClick={installer}
-        className="bg-primary text-white text-sm px-3 py-2 rounded"
-      >
+      <button type="button" onClick={lancerInstallation} className={classes}>
         📲 Installer l'application
       </button>
     )
@@ -48,9 +24,9 @@ export default function BoutonInstaller() {
 
   if (estIOS) {
     return (
-      <p className="text-xs text-text-muted">
-        Pour installer : bouton Partager, puis « Sur l'écran d'accueil ».
-      </p>
+      <Link to="/installation" className={classes}>
+        📲 Installer sur iPhone / iPad
+      </Link>
     )
   }
 

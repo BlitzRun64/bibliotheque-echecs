@@ -1,67 +1,279 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&display=swap');
 @import "tailwindcss";
 
-
+/* =====================================================================
+   Tokens du club — source unique des couleurs, rayons, ombres et espacements.
+   Palette : vert du club, noir, blanc et gris du damier.
+   Toute nouvelle couleur se déclare ici, jamais en dur dans les pages.
+   ===================================================================== */
 @theme {
-  --color-primary: #073b14;
-  --color-primary-light: #0f5c22;
-  --color-secondary: #8B5E3C;
-  --color-secondary-light: #C9A98A;
-  --color-accent: #C9A227;
-  --color-bg: #F7F5F0;
-  --color-surface: #FFFFFF;
-  --color-text: #1F2421;
-  --color-text-muted: #5C5850;
-  --color-nav-bg: #FFFFFF;
-  --color-nav-text: #374151;
-  --color-heading: #073b14;
-  --color-placeholders: #ffffff;
-  --color-input: #ffffff;
-  --color-departement : #3f3f3f;
-
-  --font-display: "Fraunces", serif;
-}
-
-[data-theme="ocean"] {
-  --color-primary: #0c4a6e;
-  --color-primary-light: #0369a1;
-  --color-secondary: #64748b;
-  --color-secondary-light: #cbd5e1;
-  --color-accent: #f59e0b;
-  --color-bg: #f0f9ff;
-  --color-surface: #eadada;
-  --color-text: #0f172a;
-  --color-text-muted: #64748b;
-  --color-nav-bg: #ffffff;
-  --color-nav-text: #374151;
-  --color-heading: #0c4a6e;
-}
-
-[data-theme="club1"] {
-   --color-primary: #023816;
-  --color-primary-light: #5322c5;
-  --color-secondary: #806b6b;
-  --color-secondary-light: #3f3f3f;
-  --color-accent: #ac0c31;
-  --color-bg: #0d0d0d;
-  --color-surface: #ebe3ec;
-  --color-text: #030202;
-  --color-text-muted: #2a2525;
+  /* Couleurs de base */
+  --color-primary: #073b14;         /* vert du club : bandeaux, boutons principaux */
+  --color-primary-light: #0f5c22;   /* survol */
+  --color-primary-dark: #04260c;    /* appui */
+  --color-secondary: #ebe8df;       /* ivoire, case claire du damier (remplace le marron) */
+  --color-secondary-light: #6b6f6c; /* gris des bordures et séparateurs */
+  --color-danger: #b42318;          /* rouge : suppressions, erreurs, alertes */
+  --color-danger-light: #d03a2d;
+  --color-danger-dark: #8c1a11;
+  --color-accent: #b42318;          /* alias historique de danger (badges « emprunté », icônes de suppression) */
+  --color-bg: #0d0d0d;              /* fond noir des pages */
+  --color-surface: #ffffff;         /* cartes, formulaires, menus */
+  --color-surface-alt: #f3f4f1;     /* lignes alternées, survols légers */
+  --color-text: #111412;
+  --color-text-muted: #55605a;
+  --color-text-inverse: #ffffff;
   --color-nav-bg: #073b14;
   --color-nav-text: #ffffff;
   --color-heading: #ffffff;
-  --color-placeholders: rgb(85, 156, 214);
-  --color-input: rgb(14, 15, 16);
+  --color-placeholders: #ffffff;
+  --color-input: #ffffff;
+  --color-departement: #3f3f3f;
+
+  /* Couleurs des catégories de ressources (voir src/config/ressources.js) */
+  --color-youtube: #c8102e;
+  --color-sites: #ffffff;
+  --color-etudes: #1d4ed8;
+  --color-specialites: #0f5c22;
+
+  /* Rayons, ombres, espacements des boutons et cartes */
+  --radius-bouton: 0.5rem;
+  --radius-carte: 0.75rem;
+  --shadow-bouton: 0 1px 2px rgb(0 0 0 / 0.3);
+  --shadow-bouton-survol: 0 4px 12px rgb(0 0 0 / 0.35);
+  --shadow-carte: 0 2px 8px rgb(0 0 0 / 0.25);
+  --shadow-carte-survol: 0 10px 24px rgb(0 0 0 / 0.4);
+  --spacing-bouton-x: 1rem;
+  --spacing-bouton-y: 0.5rem;
+  --spacing-bouton-gap: 0.5rem;
+
+  --font-display: "Fraunces", serif;
+  --font-onglets: "Cormorant Garamond", serif;
 }
 
+/* =====================================================================
+   Boutons : variables CSS + variantes.
+   Usage : <button class="btn btn-primary">…</button>
+   Variantes : btn-primary, btn-secondary, btn-ghost, btn-danger,
+               btn-youtube, btn-sites, btn-etudes, btn-specialites.
+   Tailles  : btn-sm, btn-lg, btn-icone (carré, pour une icône seule).
+   ===================================================================== */
+@layer components {
+  .btn {
+    --btn-fond: var(--color-primary);
+    --btn-fond-survol: var(--color-primary-light);
+    --btn-fond-actif: var(--color-primary-dark);
+    --btn-texte: var(--color-text-inverse);
+    --btn-bordure: transparent;
+    --btn-ombre: var(--shadow-bouton);
+    --btn-ombre-survol: var(--shadow-bouton-survol);
+    --btn-anneau: var(--color-primary-light);
+    --btn-rayon: var(--radius-bouton);
+    --btn-px: var(--spacing-bouton-x);
+    --btn-py: var(--spacing-bouton-y);
 
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-bouton-gap);
+    padding: var(--btn-py) var(--btn-px);
+    border-radius: var(--btn-rayon);
+    border: 2px solid var(--btn-bordure);
+    background-color: var(--btn-fond);
+    color: var(--btn-texte);
+    font-weight: 600;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    box-shadow: var(--btn-ombre);
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      background-color 0.2s ease,
+      border-color 0.2s ease,
+      color 0.2s ease,
+      box-shadow 0.2s ease,
+      transform 0.15s ease;
+  }
+  .btn:hover {
+    background-color: var(--btn-fond-survol);
+    box-shadow: var(--btn-ombre-survol);
+    transform: translateY(-1px);
+  }
+  .btn:active {
+    background-color: var(--btn-fond-actif);
+    box-shadow: var(--btn-ombre);
+    transform: translateY(0);
+  }
+  .btn:focus-visible {
+    outline: 3px solid var(--btn-anneau);
+    outline-offset: 2px;
+  }
+  .btn:disabled,
+  .btn[aria-disabled="true"] {
+    opacity: 0.55;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+    background-color: var(--btn-fond);
+  }
+
+  .btn-primary {
+    --btn-fond: var(--color-primary);
+    --btn-fond-survol: var(--color-primary-light);
+    --btn-fond-actif: var(--color-primary-dark);
+    --btn-texte: var(--color-text-inverse);
+  }
+  .btn-secondary {
+    --btn-fond: var(--color-surface);
+    --btn-fond-survol: var(--color-secondary);
+    --btn-fond-actif: color-mix(in srgb, var(--color-secondary) 80%, black);
+    --btn-texte: var(--color-primary);
+    --btn-bordure: var(--color-primary);
+  }
+  .btn-ghost {
+    --btn-fond: transparent;
+    --btn-fond-survol: color-mix(in srgb, currentColor 12%, transparent);
+    --btn-fond-actif: color-mix(in srgb, currentColor 22%, transparent);
+    --btn-texte: currentColor;
+    --btn-ombre: none;
+    --btn-ombre-survol: none;
+    --btn-anneau: currentColor;
+  }
+  .btn-danger {
+    --btn-fond: var(--color-danger);
+    --btn-fond-survol: var(--color-danger-light);
+    --btn-fond-actif: var(--color-danger-dark);
+    --btn-texte: var(--color-text-inverse);
+    --btn-anneau: var(--color-danger-light);
+  }
+
+  /* Une variante par catégorie de ressource */
+  .btn-youtube {
+    --btn-fond: var(--color-youtube);
+    --btn-fond-survol: color-mix(in srgb, var(--color-youtube) 85%, black);
+    --btn-fond-actif: color-mix(in srgb, var(--color-youtube) 70%, black);
+    --btn-texte: var(--color-text-inverse);
+    --btn-anneau: var(--color-youtube);
+  }
+  .btn-sites {
+    --btn-fond: var(--color-sites);
+    --btn-fond-survol: color-mix(in srgb, var(--color-sites) 90%, black);
+    --btn-fond-actif: color-mix(in srgb, var(--color-sites) 80%, black);
+    --btn-texte: var(--color-bg);
+    --btn-bordure: var(--color-bg);
+    --btn-anneau: var(--color-sites);
+  }
+  .btn-etudes {
+    --btn-fond: var(--color-etudes);
+    --btn-fond-survol: color-mix(in srgb, var(--color-etudes) 85%, black);
+    --btn-fond-actif: color-mix(in srgb, var(--color-etudes) 70%, black);
+    --btn-texte: var(--color-text-inverse);
+    --btn-anneau: var(--color-etudes);
+  }
+  .btn-specialites {
+    --btn-fond: var(--color-specialites);
+    --btn-fond-survol: color-mix(in srgb, var(--color-specialites) 85%, black);
+    --btn-fond-actif: color-mix(in srgb, var(--color-specialites) 70%, black);
+    --btn-texte: var(--color-text-inverse);
+    --btn-anneau: var(--color-specialites);
+  }
+
+  .btn-sm {
+    --btn-px: 0.625rem;
+    --btn-py: 0.25rem;
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+  .btn-lg {
+    --btn-px: 1.5rem;
+    --btn-py: 0.875rem;
+    font-size: 1.0625rem;
+    line-height: 1.5rem;
+  }
+  .btn-icone {
+    --btn-px: 0;
+    --btn-py: 0;
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 1rem;
+  }
+  .btn-sm.btn-icone {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  /* Cartes de ressources : la couleur de la catégorie arrive via --couleur-categorie */
+  .carte-ressource {
+    border-radius: var(--radius-carte);
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    border: 2px solid var(--couleur-categorie, var(--color-primary));
+    border-left-width: 8px;
+    box-shadow: var(--shadow-carte);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .carte-ressource:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      var(--shadow-carte-survol),
+      0 0 0 3px color-mix(in srgb, var(--couleur-categorie, var(--color-primary)) 35%, transparent);
+  }
+  .carte-ressource:focus-within {
+    box-shadow:
+      var(--shadow-carte-survol),
+      0 0 0 3px var(--couleur-categorie, var(--color-primary));
+  }
+
+  /* Bloc dépliable sans mesure JavaScript (transition sur grid-template-rows) */
+  .pliable {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.3s ease;
+  }
+  .pliable[data-ouvert="true"] {
+    grid-template-rows: 1fr;
+  }
+  .pliable > * {
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  /* Champs de formulaire */
+  .champ {
+    @apply w-full bg-surface border border-secondary-light rounded-lg px-3 py-2 text-sm text-text placeholder-text-muted outline-none;
+  }
+  .champ:focus {
+    @apply border-primary ring-2 ring-primary/30;
+  }
+  .input-connexion {
+    @apply w-full bg-surface border border-secondary-light rounded-lg px-4 py-3 text-text placeholder-text-muted outline-none;
+  }
+  .input-connexion:focus {
+    @apply border-primary ring-2 ring-primary/20;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .carte-ressource,
+  .pliable {
+    transition: none;
+  }
+}
+
+/* =====================================================================
+   Éléments de mise en page partagés
+   ===================================================================== */
+
+/* Titre de page sur fond blanc, posé sur le bandeau damier */
 .StitreB {
-   position: center ;
-   background-color: var(--color-heading);
-   border: 2px solid #073b14;
-   padding: 4px 8px;
-   border-radius: 5px;
-   color: #000000;
+  background-color: var(--color-heading);
+  border: 2px solid var(--color-primary);
+  padding: 4px 8px;
+  border-radius: 5px;
+  color: var(--color-bg);
 }
 
 .bibliochess {
@@ -73,32 +285,13 @@
   color: var(--color-text);
 }
 
-.inter-club {
-  max-width: 64rem;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 1rem;
-  background-color: var(--color-bg);
-  color: var(--color-text);
-}
-
-
 .font-onglets {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-onglets);
   font-weight: 600;
-  color: rgb(6, 12, 192) ;
+  color: var(--color-primary);
   letter-spacing: 0.03em;
 }
 
-.connexion {
-font-size: 0.875rem;
-color: #ffffff;}
-
-.connexion:hover {
-  font-size : 1rem;
-  font-weight: bold;
-  color: #51b6ed;
-}
 .motif-damier {
   background:
     linear-gradient(
@@ -129,41 +322,40 @@ color: #ffffff;}
     linear-gradient(
       90deg,
       transparent 23px,
-      black 23px 25px,
+      var(--color-bg) 23px 25px,
       transparent 25px
     ),
     linear-gradient(
       0deg,
       transparent 23px,
-      black 23px 25px,
+      var(--color-bg) 23px 25px,
       transparent 25px
     ),
     conic-gradient(
-      black 25%,
+      var(--color-bg) 25%,
       transparent 0 50%,
-      black 0 75%,
+      var(--color-bg) 0 75%,
       transparent 0
     );
 
   background-size: 48px 48px;
-  border: 2px solid rgb(3, 3, 3);
+  border: 2px solid var(--color-bg);
 }
-
 
 /* Tokens dédiés à la page Admin — héritent du thème global par défaut */
 :root {
   --admin-bg: rgb(232, 241, 245);
   --admin-surface: var(--color-surface);
-  --admin-surface-alt: #f9fafb;
+  --admin-surface-alt: var(--color-surface-alt);
   --admin-text: var(--color-text);
   --admin-text-muted: var(--color-text-muted);
   --admin-primary: var(--color-primary);
   --admin-primary-light: var(--color-primary-light);
-  --admin-accent: #ea02ff;
+  --admin-accent: var(--color-danger);
   --admin-secondary: var(--color-secondary);
   --admin-border: var(--color-secondary-light);
-  --admin-heading: black;
-  --admin-retarded: #ff0000;
+  --admin-heading: var(--color-bg);
+  --admin-retarded: var(--color-danger);
 }
 
 @theme {
@@ -221,16 +413,11 @@ color: #ffffff;}
   .admin-ligne {
     @apply border-b border-admin-border py-2;
   }
-
-  .input-connexion {
-  @apply w-full bg-surface border border-secondary-light rounded-lg px-4 py-3 text-text placeholder-text-muted outline-none;
-  }
-
-  .input-connexion:focus {
-    @apply border-primary ring-2 ring-primary/20;
-  } 
 }
 
+/* =====================================================================
+   Animations du logo (page Bibliothèque)
+   ===================================================================== */
 @keyframes rotation-logo {
   from {
     transform: rotate(0deg);
@@ -300,123 +487,3 @@ color: #ffffff;}
     transform: rotateY(-260deg);
   }
 }
-
-
-
-
-
-
-
-/*
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
-
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
-body {
-  margin: 0;
-}
-
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
-
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
-}
-
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
-}
-*/
