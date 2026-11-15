@@ -158,6 +158,7 @@ useEffect(() => {
   { label: 'Bibliothèque', to: '/' },
   { label: 'Tournois', to: '/tournois' },
   { label: 'Inter-club', to: '/inter-club' },
+  { label: 'Horloge', to: '/horloge' },
   { label: 'Installer l\'app', to: '/installation' },
   { label: 'Administrer', to: '/admin'},
     ...(profil?.est_admin ? [{ label: 'Plan_De_Table', to: '/Plan_De_Table/Plan_De_Table' }] : [])
