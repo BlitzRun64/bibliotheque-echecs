@@ -2,6 +2,7 @@
 // Affiche une chaîne comme "14:35", "15/11/2026" ou "3j 12h" avec les sprites
 // de public/image/pawn.png (planche verticale : une frame de 96×128 par chiffre, 0 en haut).
 // Les séparateurs (: / j h m s, espace) sont dessinés en pixel art par le code.
+import { useEffect, useState } from 'react'
 
 const PLANCHE = '/image/pawn.png'
 const LARGEUR = 96 // largeur d'une frame en px
@@ -76,29 +77,22 @@ function Separateur({ caractere, scale, couleur, contour }) {
   )
 }
 
-/**
- * @param {string|number} value   texte à afficher : chiffres + séparateurs (: / j h m s espace)
- * @param {number} scale          1 = taille réelle (128 px de haut). Préférer 1 ou 0.5.
- * @param {string} couleur        couleur des séparateurs
- * @param {string} contour        couleur du liseré des séparateurs
- * @param {string} label          texte lu par les lecteurs d'écran (par défaut : value)
- */
-export default function PixelNumber({
-  value,
-  scale = 1,
-  couleur = '#ffffff',
-  contour = '#1a1a1a',
-  label,
-  className = '',
-}) {
-  const texte = String(value)
+// Taille par défaut : ×1 sur ordinateur, ×½ sur téléphone (écran < 640 px, comme "sm" de Tailwind).
+const REQUETE_ORDI = '(min-width: 640px)'
+function useEchelleAuto() {
+  const [ordi, setOrdi] = useState(() => window.matchMedia(REQUETE_ORDI).matches)
+  useEffect(() => {
+    const mq = window.matchMedia(REQUETE_ORDI)
+    const maj = () => setOrdi(mq.matches)
+    mq.addEventListener('change', maj)
+    return () => mq.removeEventListener('change', maj)
+  }, [])
+  return ordi ? 1 : 0.5
+}
+
+function Groupe({ texte, scale, couleur, contour }) {
   return (
-    <span
-      role="img"
-      aria-label={label ?? texte}
-      className={className}
-      style={{ display: 'inline-flex', alignItems: 'center', lineHeight: 0 }}
-    >
+    <span style={{ display: 'inline-flex', alignItems: 'center' }}>
       {[...texte].map((c, i) =>
         /\d/.test(c) ? (
           <Chiffre key={i} valeur={Number(c)} scale={scale} />
@@ -106,6 +100,48 @@ export default function PixelNumber({
           <Separateur key={i} caractere={c.toLowerCase()} scale={scale} couleur={couleur} contour={contour} />
         ),
       )}
+    </span>
+  )
+}
+
+/**
+ * @param {string|number} value   texte à afficher : chiffres + séparateurs (: / j h m s espace)
+ *                                Les espaces permettent le retour à la ligne sur petit écran.
+ * @param {number} scale          1 = taille réelle (128 px de haut), 0.5 = réduit.
+ *                                Si absent : 1 sur ordinateur, 0.5 sur téléphone.
+ * @param {string} couleur        couleur des séparateurs
+ * @param {string} contour        couleur du liseré des séparateurs
+ * @param {string} label          texte lu par les lecteurs d'écran (par défaut : value)
+ */
+export default function PixelNumber({
+  value,
+  scale,
+  couleur = '#ffffff',
+  contour = '#1a1a1a',
+  label,
+  className = '',
+}) {
+  const echelleAuto = useEchelleAuto()
+  const s = scale ?? echelleAuto
+  const texte = String(value)
+  const groupes = texte.split(' ').filter(Boolean)
+  return (
+    <span
+      role="img"
+      aria-label={label ?? texte}
+      className={className}
+      style={{
+        display: 'inline-flex',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        columnGap: 24 * s,
+        lineHeight: 0,
+        maxWidth: '100%',
+      }}
+    >
+      {groupes.map((g, i) => (
+        <Groupe key={i} texte={g} scale={s} couleur={couleur} contour={contour} />
+      ))}
     </span>
   )
 }
