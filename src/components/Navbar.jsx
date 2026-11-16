@@ -150,8 +150,13 @@ export default function Navbar() {
     { label: 'Ressources', to: '/ressources', sousMenu: sousMenuRessources },
     { label: 'Événements', to: '/horloge' },
     { label: "Installer l'app", to: '/installation' },
-    { label: 'Administrer', to: '/admin' },
-    ...(estAdmin ? [{ label: 'Plan_De_Table', to: '/Plan_De_Table/Plan_De_Table' }] : []),
+    // Onglets réservés aux administrateurs.
+    ...(estAdmin
+      ? [
+          { label: 'Administrer', to: '/admin' },
+          { label: 'Plan_De_Table', to: '/Plan_De_Table/Plan_De_Table' },
+        ]
+      : []),
   ]
 
   return (
