@@ -23,7 +23,7 @@ export const CATEGORIES = [
     id: 'youtube',
     libelle: 'Chaînes YouTube',
     couleur: 'youtube',
-    image: '/image/ressources/youtube.svg',
+    image: '/image/ressources/YouTubes.svg',
     description: 'Des chaînes pour progresser en vidéo : cours, analyses et parties commentées.',
   },
   {
@@ -37,7 +37,7 @@ export const CATEGORIES = [
     id: 'etudes',
     libelle: 'Études',
     couleur: 'etudes',
-    image: '/image/ressources/etudes.svg',
+    image: '/image/ressources/etude.png',
     description: "Les études Lichess de l'équipe, saison par saison.",
   },
   {
