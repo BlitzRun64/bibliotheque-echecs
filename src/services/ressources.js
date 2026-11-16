@@ -43,9 +43,61 @@ export function chargerRessources(categorie) {
     .order('created_at', { ascending: false })
 }
 
-/** @param {ValeursRessource} valeurs */
-export function ajouterRessource(valeurs) {
-  return supabase.from('ressources').insert(nettoyer(valeurs)).select().single()
+/**
+ * @param {ValeursRessource} valeurs
+ * @param {{ dossier_id?: number | null, ordre?: number }} [placement] dossier et position de la nouvelle fiche
+ */
+export function ajouterRessource(valeurs, placement = {}) {
+  return supabase.from('ressources').insert({ ...nettoyer(valeurs), ...placement }).select().single()
+}
+
+/** Range une fiche dans un dossier (null = la sortir) à la position donnée. */
+export function deplacerRessource(id, dossierId, ordre) {
+  return supabase
+    .from('ressources')
+    .update({ dossier_id: dossierId, ordre, updated_at: new Date().toISOString() })
+    .eq('id', id)
+}
+
+// ----- Dossiers -----
+
+/** @param {string} categorie */
+export function chargerDossiers(categorie) {
+  return supabase
+    .from('dossiers_ressources')
+    .select('*')
+    .eq('categorie', categorie)
+    .order('ordre', { ascending: true })
+    .order('created_at', { ascending: true })
+}
+
+export function ajouterDossier(categorie, nom, ordre) {
+  return supabase.from('dossiers_ressources').insert({ categorie, nom: nom.trim(), ordre }).select().single()
+}
+
+export function renommerDossier(id, nom) {
+  return supabase.from('dossiers_ressources').update({ nom: nom.trim() }).eq('id', id)
+}
+
+/** Supprime le dossier ; ses fiches en ressortent (on delete set null côté base). */
+export function supprimerDossier(id) {
+  return supabase.from('dossiers_ressources').delete().eq('id', id)
+}
+
+/**
+ * Enregistre l'ordre d'une liste déjà triée (positions 1, 2, 3…), en ne touchant
+ * qu'aux lignes dont la position a changé.
+ * @param {'ressources' | 'dossiers_ressources'} table
+ * @param {{ id: number, ordre: number }[]} elements dans le nouvel ordre, avec leur ancienne position
+ */
+export async function enregistrerOrdre(table, elements) {
+  const changements = elements
+    .map((element, index) => ({ id: element.id, ordre: index + 1, avant: element.ordre }))
+    .filter((c) => c.ordre !== c.avant)
+  const resultats = await Promise.all(
+    changements.map((c) => supabase.from(table).update({ ordre: c.ordre }).eq('id', c.id)),
+  )
+  return { error: resultats.find((r) => r.error)?.error ?? null }
 }
 
 /** @param {number} id @param {ValeursRessource} valeurs */

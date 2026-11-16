@@ -15,9 +15,20 @@
  * @property {string} lien                 toujours en https://
  * @property {string | null} image_url     logo (bucket Storage « ressources » ou URL https)
  * @property {string | null} description   texte simple, affiché sans HTML
- * @property {number} ordre
+ * @property {number} ordre               position dans son dossier (ou hors dossier)
+ * @property {number | null} dossier_id    dossier qui la contient, null si elle est à la racine
  * @property {string} created_at           ISO 8601
  * @property {string} updated_at           ISO 8601
+ */
+
+/**
+ * Ligne de la table `dossiers_ressources` (voir supabase/dossiers_ressources.sql).
+ * @typedef {Object} DossierRessource
+ * @property {number} id
+ * @property {CategorieRessource} categorie
+ * @property {string} nom
+ * @property {number} ordre
+ * @property {string} created_at           ISO 8601
  */
 
 /**

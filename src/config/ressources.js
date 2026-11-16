@@ -49,6 +49,11 @@ export const CATEGORIES = [
   },
 ]
 
+// Illustration des dossiers de ressources. C'est une image de substitution : exportez votre
+// dessin en PNG (fond transparent, format carré), déposez-le dans public/image/ressources/
+// et changez le chemin ici, par exemple '/image/ressources/dossier.png'.
+export const IMAGE_DOSSIER = '/image/ressources/dossier.svg'
+
 /** @param {string} id */
 export function trouverCategorie(id) {
   return CATEGORIES.find((categorie) => categorie.id === id) ?? null

@@ -14,17 +14,25 @@ function nomDeDomaine(lien) {
 }
 
 /**
- * @param {{ ressource: Ressource, estAdmin: boolean, onModifier: (r: Ressource) => void, onSupprimer: (r: Ressource) => void }} props
+ * @param {{
+ *   ressource: Ressource, estAdmin: boolean,
+ *   onModifier: (r: Ressource) => void, onSupprimer: (r: Ressource) => void,
+ *   dossiers?: import('../types/ressources').DossierRessource[],
+ *   onDeplacer?: (r: Ressource, dossierId: number | null) => void,
+ *   poignee?: import('react').ReactNode
+ * }} props
  */
-export default function CarteRessource({ ressource, estAdmin, onModifier, onSupprimer }) {
+export default function CarteRessource({ ressource, estAdmin, onModifier, onSupprimer, dossiers = [], onDeplacer, poignee }) {
   const [ouvert, setOuvert] = useState(false)
   const idDescription = useId()
+  const idDossier = useId()
   const description = (ressource.description ?? '').trim()
   const initiale = (ressource.titre || '?').trim().charAt(0).toUpperCase()
   const domaine = nomDeDomaine(ressource.lien)
 
   return (
-    <article className="carte-ressource p-4 flex gap-4">
+    <article className="carte-ressource h-full p-4 flex gap-4">
+      {poignee && <div className="-ml-2 -mr-2 self-start">{poignee}</div>}
       <div className="w-16 h-16 shrink-0 rounded-xl border-2 border-black/80 bg-surface-alt overflow-hidden flex items-center justify-center">
         {ressource.image_url ? (
           <img
@@ -85,6 +93,23 @@ export default function CarteRessource({ ressource, estAdmin, onModifier, onSupp
             <button type="button" className="btn btn-danger btn-sm" onClick={() => onSupprimer(ressource)}>
               🗑️ Supprimer
             </button>
+            {onDeplacer && (dossiers.length > 0 || ressource.dossier_id) && (
+              <span className="inline-flex items-center gap-1 text-sm">
+                <label htmlFor={idDossier}>📁</label>
+                <select
+                  id={idDossier}
+                  className="rounded-lg border border-secondary-light bg-surface px-2 py-1 text-sm"
+                  value={ressource.dossier_id ?? ''}
+                  onChange={(e) => onDeplacer(ressource, e.target.value === '' ? null : Number(e.target.value))}
+                  aria-label="Ranger dans un dossier"
+                >
+                  <option value="">Hors dossier</option>
+                  {dossiers.map((d) => (
+                    <option key={d.id} value={d.id}>{d.nom}</option>
+                  ))}
+                </select>
+              </span>
+            )}
           </div>
         )}
       </div>
