@@ -23,7 +23,7 @@ export const CATEGORIES = [
     id: 'youtube',
     libelle: 'Chaînes YouTube',
     couleur: 'youtube',
-    image: '/image/ressources/YouTubes.svg',
+    image: '/image/ressources/youtube.webp',
     description: 'Des chaînes pour progresser en vidéo : cours, analyses et parties commentées.',
   },
   {
