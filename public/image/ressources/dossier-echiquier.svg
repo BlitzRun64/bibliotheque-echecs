@@ -1,18 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges">
-  <!--
-    Dossier en pixel art, thème échiquier noir et blanc.
-    La grille fait 16 x 16 pixels (viewBox) : chaque <rect> colorie un bloc de pixels.
-    x / y = colonne / ligne du coin haut gauche (0 à 15), width / height = taille en pixels.
-    Pour changer une couleur : remplacer le code couleur (fill="#......") du bloc voulu.
-  -->
-  <defs>
-    <!-- Damier : cases de 2 x 2 pixels, alignées sur le rabat avant (x=1, y=8). -->
-    <pattern id="damier" x="1" y="8" width="4" height="4" patternUnits="userSpaceOnUse">
-      <rect width="4" height="4" fill="#1f1f1f"/>
-      <rect width="2" height="2" fill="#f2f2f2"/>
-      <rect x="2" y="2" width="2" height="2" fill="#f2f2f2"/>
-    </pattern>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" shape-rendering="crispEdges">
+  <!-- Dossier en pixel art, theme echiquier noir et blanc. Grille de 16 x 16 pixels :
+       chaque rect colorie un bloc (x, y = coin haut gauche ; width, height = taille).
+       Uniquement des rect simples : affichage fiable sur tous les navigateurs mobiles. -->
 
   <!-- Contour (noir) -->
   <rect x="1" y="2" width="5" height="1" fill="#000000"/>
@@ -22,16 +11,29 @@
   <rect x="15" y="5" width="1" height="9" fill="#000000"/>
   <rect x="1" y="14" width="14" height="1" fill="#000000"/>
 
-  <!-- Onglet et dos du dossier (gris foncé) -->
+  <!-- Onglet et dos du dossier (gris fonce), reflet sur l'onglet (gris clair) -->
   <rect x="1" y="3" width="5" height="2" fill="#5a5a5a"/>
   <rect x="6" y="4" width="1" height="1" fill="#5a5a5a"/>
   <rect x="1" y="5" width="14" height="2" fill="#5a5a5a"/>
-  <!-- Reflet sur l'onglet (gris clair) -->
   <rect x="1" y="3" width="5" height="1" fill="#8c8c8c"/>
 
-  <!-- Séparation entre le dos et le rabat avant -->
+  <!-- Separation entre le dos et le rabat avant -->
   <rect x="1" y="7" width="14" height="1" fill="#000000"/>
 
-  <!-- Rabat avant : le damier -->
-  <rect x="1" y="8" width="14" height="6" fill="url(#damier)"/>
+  <!-- Rabat avant : damier. Fond noir, puis cases blanches de 2 x 2 pixels. -->
+  <rect x="1" y="8" width="14" height="6" fill="#1f1f1f"/>
+  <!-- rangee 1 -->
+  <rect x="1" y="8" width="2" height="2" fill="#f2f2f2"/>
+  <rect x="5" y="8" width="2" height="2" fill="#f2f2f2"/>
+  <rect x="9" y="8" width="2" height="2" fill="#f2f2f2"/>
+  <rect x="13" y="8" width="2" height="2" fill="#f2f2f2"/>
+  <!-- rangee 2 -->
+  <rect x="3" y="10" width="2" height="2" fill="#f2f2f2"/>
+  <rect x="7" y="10" width="2" height="2" fill="#f2f2f2"/>
+  <rect x="11" y="10" width="2" height="2" fill="#f2f2f2"/>
+  <!-- rangee 3 -->
+  <rect x="1" y="12" width="2" height="2" fill="#f2f2f2"/>
+  <rect x="5" y="12" width="2" height="2" fill="#f2f2f2"/>
+  <rect x="9" y="12" width="2" height="2" fill="#f2f2f2"/>
+  <rect x="13" y="12" width="2" height="2" fill="#f2f2f2"/>
 </svg>
