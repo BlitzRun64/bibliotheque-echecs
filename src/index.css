@@ -263,6 +263,41 @@
   }
 }
 
+/* ---------------------------------------------------------------------
+   Point lumineux des catégories (sous-menu « Ressources » de la barre).
+   Couleur donnée par --point (ex. var(--color-youtube)), rang par --rang (0, 1, 2…).
+   Chaque point s'éclaircit puis revient à sa couleur, l'un après l'autre :
+   la lumière fait le tour des catégories.
+   --------------------------------------------------------------------- */
+@property --eclat {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 0%;
+}
+
+.point-lumineux {
+  --couleur-point: color-mix(in srgb, var(--point) calc(100% - var(--eclat)), rgb(0, 0, 0));
+  background-color: var(--couleur-point);
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 0.3),
+    0 0 0 4px color-mix(in srgb, var(--couleur-point) 5%, transparent),
+    0 0 25px 3px var(--couleur-point);
+  animation: point-pulse 2.4s ease-in-out infinite;
+  /* 4 catégories, 2,4 s : chaque point s'allume 0,6 s après le précédent. */
+  animation-delay: calc(var(--rang, 0) * 0.6s);
+}
+
+@keyframes point-pulse {
+  0%, 60%, 100% { --eclat: 0%; }
+  25% { --eclat: 50%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .point-lumineux {
+    animation: none;
+  }
+}
+
 /* =====================================================================
    Éléments de mise en page partagés
    ===================================================================== */

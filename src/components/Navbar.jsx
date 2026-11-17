@@ -190,17 +190,18 @@ export default function Navbar() {
                     <span aria-hidden="true" className="text-xs">▾</span>
                   </Link>
                   <div className="absolute left-0 top-full pt-2 hidden group-hover:block group-focus-within:block z-50">
-                    <div className="w-56 rounded-lg bg-surface text-text shadow-carte-survol border border-secondary-light overflow-hidden py-1">
-                      {o.sousMenu.map((categorie) => (
+                    <div className="w-56 rounded-lg bg-black text-white shadow-carte-survol border border-white/15 overflow-hidden py-1">
+                      {o.sousMenu.map((categorie, rang) => (
                         <Link
                           key={categorie.to}
                           to={categorie.to}
-                          className="flex items-center gap-3 px-4 py-2 text-sm hover:bg-surface-alt focus:bg-surface-alt focus:outline-none"
+                          className="flex items-center gap-3 px-4 py-2 text-sm hover:bg-white/10 focus:bg-white/10 focus:outline-none"
                         >
                           <span
                             aria-hidden="true"
-                            className="w-3 h-3 rounded-full border border-black/30 shrink-0"
-                            style={{ backgroundColor: `var(--color-${categorie.couleur})` }}
+                            // Point lumineux qui pulse à tour de rôle (voir .point-lumineux dans index.css).
+                            className="point-lumineux w-2.5 h-2.5 rounded-full shrink-0"
+                            style={{ '--point': `var(--color-${categorie.couleur})`, '--rang': rang }}
                           ></span>
                           {categorie.label}
                         </Link>
