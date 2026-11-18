@@ -15,6 +15,8 @@ import Installation from './pages/Installation'
 import Plan_De_Table from './pages/Plan_De_Table/Plan_De_Table'
 import AdminRoute from './components/AdminRoute'
 import Horloge from './pages/Horloge'
+import MentionsLegales from './pages/MentionsLegales'
+import PiedDePage from './components/PiedDePage'
 
 export default function App() {
   return (
@@ -35,8 +37,10 @@ export default function App() {
         <Route path="/inter-club" element={<Navigate to="/ressources/etudes" replace />} />
         <Route path="/installation" element={<Installation />} />
         <Route path="/horloge" element={<Horloge />} />
+        <Route path="/mentions-legales" element={<MentionsLegales />} />
         <Route path="/Plan_De_Table/Plan_De_Table" element={<AdminRoute><Plan_De_Table /></AdminRoute>} />
       </Routes>
+      <PiedDePage />
       {/* Enregistre le service worker et propose les mises à jour (voir vite.config.js, registerType 'prompt') */}
       <UpdatePrompt />
     </BrowserRouter>

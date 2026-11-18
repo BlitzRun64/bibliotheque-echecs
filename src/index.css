@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&display=swap');
 @import "tailwindcss";
 
 /* =====================================================================
@@ -29,6 +28,12 @@
   --color-placeholders: #ffffff;
   --color-input: #ffffff;
   --color-departement: #3f3f3f;
+  --color-ffe: #00529c;             /* bleu FFE : en-tête des sections régionales (Normandie) */
+  --color-ffe-light: rgb(0 82 156 / 0.5);
+  --color-frise-fond: #262421;      /* fond de la frise « Parcours temporel » */
+  --color-frise-date: #c98a2b;      /* titres de date de la frise */
+  --color-frise-ligne: #8a5a1c;     /* trait vertical et anneau des pastilles */
+  --color-frise-pastille: #cb7b10;  /* fond des pastilles de cadence */
 
   /* Couleurs des catégories de ressources (voir src/config/ressources.js) */
   --color-youtube: #c8102e;
@@ -47,7 +52,7 @@
   --spacing-bouton-y: 0.5rem;
   --spacing-bouton-gap: 0.5rem;
 
-  --font-display: "Fraunces", serif;
+  --font-display: "Fraunces Variable", serif;
   --font-onglets: "Cormorant Garamond", serif;
 }
 

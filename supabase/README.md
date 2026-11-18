@@ -9,6 +9,7 @@ Les scripts sont rejouables sans erreur (`if not exists`, `drop policy if exists
 | 1 | `evenements.sql` | Table `evenements` (onglet Événements, comptes à rebours) | déjà exécuté |
 | 2 | `ressources.sql` | Enum `categorie_ressource`, table `ressources`, bucket Storage `ressources`, reprise des 3 études Lichess | **à exécuter** |
 | 3 | `dossiers_ressources.sql` | Table `dossiers_ressources`, colonne `ressources.dossier_id` (dossiers et ordre par glisser-déposer) | **à exécuter** |
+| 4 | `liens_tournois_dates.sql` | Colonnes `date_debut`, `date_fin`, `cadence` de `liens_tournois` (frise « Parcours temporel »), droit de modification admin | **à exécuter** |
 
 ## Vérifier après `ressources.sql`
 
