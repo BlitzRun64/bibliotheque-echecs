@@ -78,7 +78,9 @@ function PastilleCadence({ cadence }) {
 
   return (
     <span
-      className="relative z-10 w-12 h-12 shrink-0 rounded-full bg-frise-pastille border-4 border-frise-ligne flex items-center justify-center overflow-hidden text-xl"
+      // 88 px dont 4 px de bordure : 80 px pour l'image, soit ×2 pour une image 40×40 et ×4 pour une 20×20
+      // (agrandissement entier, donc pixels réguliers).
+      className="relative z-10 w-22 h-22 shrink-0 rounded-full bg-frise-pastille border-4 border-frise-ligne flex items-center justify-center overflow-hidden text-4xl"
       title={infos.libelle}
     >
       {imageAbsente ? (
@@ -127,8 +129,8 @@ function FriseTournois({ liens }) {
         <section key={groupe.date} className="mb-4 last:mb-0">
           <h3 className="font-bold text-frise-date tracking-wide mb-2">{enTeteDate(groupe.date)}</h3>
           <ol className="relative ml-6">
-            {/* Trait vertical qui relie les pastilles, centré sous elles (pastille de 48 px). */}
-            <span aria-hidden="true" className="absolute left-[22px] top-0 bottom-0 w-1 bg-frise-ligne" />
+            {/* Trait vertical qui relie les pastilles, centré sous elles (pastille de 88 px). */}
+            <span aria-hidden="true" className="absolute left-[42px] top-0 bottom-0 w-1 bg-frise-ligne" />
             {groupe.liens.map((lien) => (
               <li
                 key={lien.id}
